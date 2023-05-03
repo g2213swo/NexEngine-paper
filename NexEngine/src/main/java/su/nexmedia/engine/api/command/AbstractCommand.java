@@ -8,7 +8,6 @@ import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.NexPlugin;
 import su.nexmedia.engine.api.manager.IPlaceholder;
 import su.nexmedia.engine.lang.EngineLang;
-import su.nexmedia.engine.utils.CollectionsUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nexmedia.engine.utils.message.NexParser;
 import su.nexmedia.engine.utils.regex.RegexUtil;
@@ -21,16 +20,17 @@ import java.util.stream.Stream;
 
 public abstract class AbstractCommand<P extends NexPlugin<P>> implements IPlaceholder {
 
-    public static final String PLACEHOLDER_USAGE       = "%command_usage%";
+    public static final String PLACEHOLDER_USAGE = "%command_usage%";
     public static final String PLACEHOLDER_DESCRIPTION = "%command_description%";
-    public static final String PLACEHOLDER_LABEL       = "%command_label%";
+    public static final String PLACEHOLDER_LABEL = "%command_label%";
 
-    private final Map<String, Pattern>            flags;
-    protected     P                               plugin;
-    protected     String[]                        aliases;
-    protected     String                          permission;
-    protected     Map<String, AbstractCommand<P>> childrens;
-    protected     AbstractCommand<P>              parent;
+    private final Map<String, Pattern> flags;
+
+    protected P plugin;
+    protected String[] aliases;
+    protected String permission;
+    protected Map<String, AbstractCommand<P>> childrens;
+    protected AbstractCommand<P> parent;
 
     public AbstractCommand(@NotNull P plugin, @NotNull List<String> aliases) {
         this(plugin, aliases.toArray(new String[0]));
@@ -178,7 +178,7 @@ public abstract class AbstractCommand<P extends NexPlugin<P>> implements IPlaceh
         StringBuilder labels = new StringBuilder();
         AbstractCommand<P> parent = this.getParent();
         while (parent != null) {
-            //labels.append(" ");
+            // labels.append(" ");
             labels.insert(0, parent.getAliases()[0] + " ");
             parent = parent.getParent();
         }
@@ -204,10 +204,6 @@ public abstract class AbstractCommand<P extends NexPlugin<P>> implements IPlaceh
 
     protected final void errorSender(@NotNull CommandSender sender) {
         plugin.getMessage(EngineLang.ERROR_COMMAND_SENDER).send(sender);
-    }
-
-    protected final void errorType(@NotNull CommandSender sender, @NotNull Class<?> clazz) {
-        plugin.getMessage(EngineLang.ERROR_TYPE_INVALID).replace("%types%", CollectionsUtil.getEnums(clazz)).send(sender);
     }
 
     protected final void errorNumber(@NotNull CommandSender sender, @NotNull String from) {

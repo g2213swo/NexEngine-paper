@@ -7,12 +7,13 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nexmedia.engine.api.manager.IPlaceholder;
+import su.nexmedia.engine.api.placeholder.PlaceholderConstants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 public class ComponentUtil {
@@ -129,11 +130,21 @@ public class ComponentUtil {
         return stripped;
     }
 
+    /**
+     * A convenience method to replace the literal in the component with a new string (support MiniMessage).
+     *
+     * @return a modified copy of the component
+     */
     @Contract(pure = true)
-    public static @NotNull Component replace(@NotNull Component component, String literal, String replacement) {
-        return replace(component, literal, asComponent(replacement));
+    public static @NotNull Component replace(@NotNull Component component, String literal, String miniMessage) {
+        return replace(component, literal, asComponent(miniMessage));
     }
 
+    /**
+     * A convenience method to replace the literal in the component with a new component.
+     *
+     * @return a modified copy of the component
+     */
     @Contract(pure = true)
     public static @NotNull Component replace(@NotNull Component component, String literal, Component replacement) {
         return component.replaceText(config -> config
@@ -142,11 +153,18 @@ public class ComponentUtil {
         );
     }
 
+    @Contract(pure = true)
+    public static @NotNull Component replaceEach(@NotNull Component text, @NotNull List<Pair<String, Supplier<String>>> replacements) {
+        for (final Pair<String, Supplier<String>> repl : replacements)
+            text = replace(text, repl.getFirst(), repl.getSecond().get()); // Reassign it
+        return text;
+    }
+
     /**
      * Applies the string replacer to given component.
      *
-     * @param replacer  a string replacer
      * @param component a component which the string replacer applies to
+     * @param replacer  a string replacer
      *
      * @return a modified copy of the component
      */
@@ -154,7 +172,7 @@ public class ComponentUtil {
     @Contract(pure = true)
     public static @NotNull Component replace(@NotNull Component component, @NotNull UnaryOperator<String>... replacer) {
         return component.replaceText(config -> config
-            .match(IPlaceholder.PERCENT_PATTERN)
+            .match(PlaceholderConstants.PERCENT_PATTERN)
             .replacement((matchResult, builder) -> {
                 String replaced = matchResult.group();
                 for (final UnaryOperator<String> re : replacer) {
@@ -168,8 +186,8 @@ public class ComponentUtil {
     /**
      * Applies the string replacer to each component of the list.
      *
-     * @param replacer      a string replacer
      * @param componentList a list of components which the string replacer applies to
+     * @param replacer      a string replacer
      *
      * @return a mutable modified copy of the list
      */

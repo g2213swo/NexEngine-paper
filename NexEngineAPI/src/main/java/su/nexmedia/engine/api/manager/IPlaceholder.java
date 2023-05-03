@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
+@Deprecated
 public interface IPlaceholder {
 
     String  DELIMITER_DEFAULT = "\n";

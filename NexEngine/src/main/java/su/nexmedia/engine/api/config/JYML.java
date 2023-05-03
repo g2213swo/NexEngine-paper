@@ -23,8 +23,8 @@ import su.nexmedia.engine.NexEngine;
 import su.nexmedia.engine.NexPlugin;
 import su.nexmedia.engine.Version;
 import su.nexmedia.engine.api.menu.MenuItem;
-import su.nexmedia.engine.api.menu.MenuItemImpl;
 import su.nexmedia.engine.api.menu.MenuItemType;
+import su.nexmedia.engine.api.placeholder.PlaceholderConstants;
 import su.nexmedia.engine.api.type.ClickType;
 import su.nexmedia.engine.utils.*;
 
@@ -141,24 +141,20 @@ public class JYML extends YamlConfiguration {
 
     @Override
     public void set(@NotNull String path, @Nullable Object value) {
-        if (value instanceof JOption.Writer writer) {
-            writer.write(this, path);
-        } else {
-            if (value instanceof String) {
-                // Keep it as it is
-            } else if (value instanceof Component component) {
-                value = ComponentUtil.asMiniMessage(component);
-            } else if (value instanceof Collection<?> collection) {
-                List<Object> list = new ArrayList<>(collection);
-                list.replaceAll(obj -> obj instanceof Component component ? ComponentUtil.asMiniMessage(component) : obj);
-                value = list;
-            } else if (value instanceof Location location) {
-                value = LocationUtil.serialize(location);
-            } else if (value instanceof Enum<?> en) {
-                value = en.name();
-            }
-            super.set(path, value);
+        if (value instanceof String str) {
+            // Keep it as it is
+        } else if (value instanceof Component component) {
+            value = ComponentUtil.asMiniMessage(component);
+        } else if (value instanceof Collection<?> collection) {
+            List<Object> list = new ArrayList<>(collection);
+            list.replaceAll(obj -> obj instanceof Component component ? ComponentUtil.asMiniMessage(component) : obj);
+            value = list;
+        } else if (value instanceof Location location) {
+            value = LocationUtil.serialize(location);
+        } else if (value instanceof Enum<?> en) {
+            value = en.name();
         }
+        super.set(path, value);
         this.isChanged = true;
     }
 
@@ -240,19 +236,21 @@ public class JYML extends YamlConfiguration {
 
     @Nullable
     public <T extends Enum<T>> T getEnum(@NotNull String path, @NotNull Class<T> clazz) {
-        return CollectionsUtil.getEnum(this.getString(path, ""), clazz);
+        return StringUtil.getEnum(this.getString(path, ""), clazz).orElse(null);
     }
 
     @NotNull
     public <T extends Enum<T>> T getEnum(@NotNull String path, @NotNull Class<T> clazz, @NotNull T def) {
-        @Nullable T val = this.getEnum(path, clazz);
-        return val == null ? def : val;
+        return StringUtil.getEnum(this.getString(path, ""), clazz).orElse(def);
     }
 
     @NotNull
     public <T extends Enum<T>> List<T> getEnumList(@NotNull String path, @NotNull Class<T> clazz) {
-        return this.getStringSet(path).stream().map(str -> CollectionsUtil.getEnum(str, clazz))
-            .filter(Objects::nonNull).toList();
+        return this.getStringSet(path)
+            .stream()
+            .map(str -> StringUtil.getEnum(str, clazz).orElse(null))
+            .filter(Objects::nonNull)
+            .toList();
     }
 
     /*@NotNull
@@ -294,11 +292,6 @@ public class JYML extends YamlConfiguration {
     public ItemStack getItem(@NotNull String path) {
         if (!path.isEmpty() && !path.endsWith(".")) path = path + ".";
 
-        /*if (this.getBoolean(path + "Encoded.Use")) {
-            ItemStack item = this.getItemEncoded(path + "Encoded.Value");
-            return item == null ? new ItemStack(Material.AIR) : item;
-        }*/
-
         Material material = Material.getMaterial(this.getString(path + "Material", "").toUpperCase());
         if (material == null || material == Material.AIR) return new ItemStack(Material.AIR);
 
@@ -337,10 +330,10 @@ public class JYML extends YamlConfiguration {
         meta.setCustomModelData(model != 0 ? model : null);
 
         List<String> flags = this.getStringList(path + "Item_Flags");
-        if (flags.contains(Placeholders.WILDCARD)) {
+        if (flags.contains(PlaceholderConstants.WILDCARD)) {
             meta.addItemFlags(ItemFlag.values());
         } else {
-            flags.stream().map(str -> CollectionsUtil.getEnum(str, ItemFlag.class)).filter(Objects::nonNull).forEach(meta::addItemFlags);
+            flags.stream().map(str -> StringUtil.getEnum(str, ItemFlag.class).orElse(null)).filter(Objects::nonNull).forEach(meta::addItemFlags);
         }
 
         String colorRaw = this.getString(path + "Color");
@@ -360,11 +353,13 @@ public class JYML extends YamlConfiguration {
     }
 
     @NotNull
+    @Deprecated
     public MenuItem getMenuItem(@NotNull String path) {
         return this.getMenuItem(path, MenuItemType.class);
     }
 
     @NotNull
+    @Deprecated
     public <T extends Enum<T>> MenuItem getMenuItem(@NotNull String path, @Nullable Class<T> clazzEnum) {
         if (!path.endsWith(".")) path = path + ".";
 
@@ -392,14 +387,14 @@ public class JYML extends YamlConfiguration {
 
         Map<ClickType, List<String>> clickCommands = new HashMap<>();
         for (String sType : this.getSection(path + "Click_Actions")) {
-            ClickType clickType = CollectionsUtil.getEnum(sType, ClickType.class);
+            ClickType clickType = StringUtil.getEnum(sType, ClickType.class).orElse(null);
             if (clickType == null) continue;
 
             clickCommands.put(clickType, this.getStringList(path + "Click_Actions." + sType));
         }
 
         this.saveChanges();
-        return new MenuItemImpl(id, type, slots, priority, item, clickCommands);
+        return new MenuItem(id, type, slots, priority, item, clickCommands);
     }
 
     public void setItem(@NotNull String path, @Nullable ItemStack item) {
@@ -418,20 +413,6 @@ public class JYML extends YamlConfiguration {
 
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return;
-
-        /*boolean hasNbt = !meta.getPersistentDataContainer().isEmpty();
-        if (hasNbt) {
-            this.set(path + "Encoded.Use", true);
-            this.setItemEncoded(path + "Encoded.Value", item);
-        }
-        else {
-            if (this.contains(path + "Encoded.Value")) {
-                this.set(path + "Encoded.Use", false);
-            }
-            else {
-                this.remove(path + "Encoded");
-            }
-        }*/
 
         if (meta instanceof Damageable damageable) {
             this.set(path + "Durability", damageable.getDamage() <= 0 ? null : damageable.getDamage());

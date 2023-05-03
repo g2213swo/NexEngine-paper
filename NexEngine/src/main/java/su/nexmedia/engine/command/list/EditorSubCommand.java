@@ -4,7 +4,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
 import org.jetbrains.annotations.NotNull;
-
 import su.nexmedia.engine.NexPlugin;
 import su.nexmedia.engine.api.command.AbstractCommand;
 import su.nexmedia.engine.api.editor.EditorHolder;

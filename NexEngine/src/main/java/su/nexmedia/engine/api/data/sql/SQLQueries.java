@@ -45,16 +45,16 @@ public class SQLQueries {
         }
     }
 
-    public static boolean executeStatement(@NotNull AbstractDataConnector connector, @NotNull String sql) {
-        return executeStatement(connector, sql, Collections.emptySet());
+    public static void executeStatement(@NotNull AbstractDataConnector connector, @NotNull String sql) {
+        executeStatement(connector, sql, Collections.emptySet());
     }
 
-    public static boolean executeStatement(@NotNull AbstractDataConnector connector, @NotNull String sql,
+    public static void executeStatement(@NotNull AbstractDataConnector connector, @NotNull String sql,
         @NotNull Collection<String> values1) {
-        return executeStatement(connector, sql, values1, Collections.emptySet());
+        executeStatement(connector, sql, values1, Collections.emptySet());
     }
 
-    public static boolean executeStatement(@NotNull AbstractDataConnector connector, @NotNull String sql,
+    public static void executeStatement(@NotNull AbstractDataConnector connector, @NotNull String sql,
         @NotNull Collection<String> values1, @NotNull Collection<String> values2) {
 
         try (Connection connection = connector.getConnection();
@@ -71,9 +71,7 @@ public class SQLQueries {
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
         }
-        return true;
     }
 
     @NotNull

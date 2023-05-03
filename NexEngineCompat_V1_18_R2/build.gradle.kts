@@ -9,7 +9,7 @@ plugins {
 
 dependencies {
     compileOnly(project(":NMS"))
-    paperDevBundle("1.18.2-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("1.18.2-R0.1-SNAPSHOT")
 }
 
 description = "NexEngineCompat_V1_18_R2"

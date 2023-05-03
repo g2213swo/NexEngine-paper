@@ -8,11 +8,7 @@ public class EngineLang {
     public static final LangKey CORE_COMMAND_HELP_LIST = new LangKey("Core.Command.Help.List",
         """
         <gold><st>              </st><b>[</b> <yellow><b>%plugin_name_localized%</b></yellow> <gray>-</gray> <yellow><b>Commands</b></yellow> <b>]</b><st>              </st></gold>
-                
-        <gray>  <dark_red><b><></b></dark_red> <gray>- Required</gray> , <dark_green><b>[]</b></dark_green> <gray>- Optional</gray>
-                
         <gold>▪ <yellow>/%command_label%</yellow> <gold>%command_usage%</gold> <gray>- %command_description%</gray>
-                
         """);
     public static final LangKey CORE_COMMAND_HELP_DESC = new LangKey("Core.Command.Help.Desc", "Show help page.");
     public static final LangKey CORE_COMMAND_EDITOR_DESC = new LangKey("Core.Command.Editor.Desc", "Opens GUI Editor.");
@@ -39,14 +35,13 @@ public class EngineLang {
     public static final LangKey ERROR_NUMBER_INVALID = new LangKey("Error.Number.Invalid", "<red><gray>%num%</gray> is not a valid number.");
     public static final LangKey ERROR_PERMISSION_DENY = new LangKey("Error.Permission.Deny", "<red>You don't have permissions to do that!");
     public static final LangKey ERROR_ITEM_INVALID = new LangKey("Error.Item.Invalid", "<red>You must hold an item!");
-    public static final LangKey ERROR_TYPE_INVALID = new LangKey("Error.Type.Invalid", "Invalid type. Available: %types%");
     public static final LangKey ERROR_COMMAND_SELF = new LangKey("Error.Command.Self", "Can not be used on yourself.");
     public static final LangKey ERROR_COMMAND_SENDER = new LangKey("Error.Command.Sender", "This command is for players only.");
     public static final LangKey ERROR_INTERNAL = new LangKey("Error.Internal", "<red>Internal error!");
 
     public static final LangKey EDITOR_TIP_EXIT = new LangKey("Editor.Tip.Exit", "<click:run_command:'/#exit'><hover:show_text:'<gray>Click me or type <white>#exit</white></gray>'><aqua>Click to exit the <light_purple>Edit Mode</light_purple></aqua></hover></click>");
     public static final LangKey EDITOR_TITLE_DONE = LangKey.of("Editor.Title.Done", "<green><b>Done!");
-    public static final LangKey EDITOR_TITLE_EDIT = LangKey.of("Editor.Title.Edit", "<green><b>Editing...");
+    public static final LangKey EDITOR_TITLE_EDIT = LangKey.of("Editor.Title.Edit", "<green><b><Edit Mode>");
     public static final LangKey EDITOR_TITLE_ERROR = LangKey.of("Editor.Title.Error", "<red><b>Error!");
     public static final LangKey EDITOR_ERROR_NUMBER_GENERIC = LangKey.of("Editor.Error.Number.Generic", "<gray>Invalid number!");
     public static final LangKey EDITOR_ERROR_NUMBER_NOT_INT = LangKey.of("Editor.Error.Number.NotInt", "<gray>Number must be <red>Integer</red>!");

@@ -4,20 +4,22 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.NexEngine;
+import su.nexmedia.engine.Version;
 import su.nexmedia.engine.config.EngineConfig;
 import su.nexmedia.engine.hooks.Hooks;
 import su.nexmedia.engine.hooks.misc.PlaceholderHook;
 
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 public class ItemUtil {
@@ -43,12 +45,10 @@ public class ItemUtil {
         return meta != null && meta.hasLore() ? Objects.requireNonNull(meta.lore()) : new ArrayList<>();
     }
 
-    public static void mapMeta(@NotNull ItemStack item, @NotNull Consumer<ItemMeta> function) {
-        ItemMeta meta = item.getItemMeta();
-        if (meta == null) return;
-
-        function.accept(meta);
-        item.setItemMeta(meta);
+    public static @NotNull ItemStack createCustomHead(@NotNull String texture) {
+        ItemStack item = new ItemStack(Material.PLAYER_HEAD);
+        setSkullTexture(item, texture);
+        return item;
     }
 
     public static void setSkullTexture(@NotNull ItemStack item, @NotNull String value) {
@@ -68,8 +68,7 @@ public class ItemUtil {
         item.setItemMeta(meta);
     }
 
-    @Nullable
-    public static String getSkullTexture(@NotNull ItemStack item) {
+    public static @Nullable String getSkullTexture(@NotNull ItemStack item) {
         if (item.getType() != Material.PLAYER_HEAD) return null;
 
         SkullMeta meta = (SkullMeta) item.getItemMeta();
@@ -195,16 +194,17 @@ public class ItemUtil {
             meta.lore(ComponentUtil.removeItalic(meta.lore()));
     }
 
+    @Deprecated
     public static boolean isWeapon(@NotNull ItemStack item) {
         return isSword(item) || isAxe(item) || isTrident(item);
     }
 
     public static boolean isTool(@NotNull ItemStack item) {
-        return ENGINE.getNMS().isTool(item);
+        return isAxe(item) || isHoe(item) || isPickaxe(item) || isShovel(item);
     }
 
     public static boolean isArmor(@NotNull ItemStack item) {
-        return ENGINE.getNMS().isArmor(item);
+        return isHelmet(item) || isChestplate(item) || isLeggings(item) || isBoots(item);
     }
 
     public static boolean isBow(@NotNull ItemStack item) {
@@ -212,11 +212,25 @@ public class ItemUtil {
     }
 
     public static boolean isSword(@NotNull ItemStack item) {
-        return ENGINE.getNMS().isSword(item);
+        if (Version.isAtLeast(Version.V1_19_R3)) {
+            return Tag.ITEMS_SWORDS.isTagged(item.getType());
+        }
+
+        Material material = item.getType();
+        return material == Material.DIAMOND_SWORD || material == Material.GOLDEN_SWORD
+               || material == Material.IRON_SWORD || material == Material.NETHERITE_SWORD
+               || material == Material.STONE_SWORD || material == Material.WOODEN_SWORD;
     }
 
     public static boolean isAxe(@NotNull ItemStack item) {
-        return ENGINE.getNMS().isAxe(item);
+        if (Version.isAtLeast(Version.V1_19_R3)) {
+            return Tag.ITEMS_AXES.isTagged(item.getType());
+        }
+
+        Material material = item.getType();
+        return material == Material.DIAMOND_AXE || material == Material.GOLDEN_AXE
+               || material == Material.IRON_AXE || material == Material.NETHERITE_AXE
+               || material == Material.STONE_AXE || material == Material.WOODEN_AXE;
     }
 
     public static boolean isTrident(@NotNull ItemStack item) {
@@ -224,15 +238,36 @@ public class ItemUtil {
     }
 
     public static boolean isPickaxe(@NotNull ItemStack item) {
-        return ENGINE.getNMS().isPickaxe(item);
+        if (Version.isAtLeast(Version.V1_19_R3)) {
+            return Tag.ITEMS_PICKAXES.isTagged(item.getType());
+        }
+
+        Material material = item.getType();
+        return material == Material.DIAMOND_PICKAXE || material == Material.GOLDEN_PICKAXE
+               || material == Material.IRON_PICKAXE || material == Material.NETHERITE_PICKAXE
+               || material == Material.STONE_PICKAXE || material == Material.WOODEN_PICKAXE;
     }
 
     public static boolean isShovel(@NotNull ItemStack item) {
-        return ENGINE.getNMS().isShovel(item);
+        if (Version.isAtLeast(Version.V1_19_R3)) {
+            return Tag.ITEMS_SHOVELS.isTagged(item.getType());
+        }
+
+        Material material = item.getType();
+        return material == Material.DIAMOND_SHOVEL || material == Material.GOLDEN_SHOVEL
+               || material == Material.IRON_SHOVEL || material == Material.NETHERITE_SHOVEL
+               || material == Material.STONE_SHOVEL || material == Material.WOODEN_SHOVEL;
     }
 
     public static boolean isHoe(@NotNull ItemStack item) {
-        return ENGINE.getNMS().isHoe(item);
+        if (Version.isAtLeast(Version.V1_19_R3)) {
+            return Tag.ITEMS_HOES.isTagged(item.getType());
+        }
+
+        Material material = item.getType();
+        return material == Material.DIAMOND_HOE || material == Material.GOLDEN_HOE
+               || material == Material.IRON_HOE || material == Material.NETHERITE_HOE
+               || material == Material.STONE_HOE || material == Material.WOODEN_HOE;
     }
 
     public static boolean isElytra(@NotNull ItemStack item) {
@@ -244,53 +279,47 @@ public class ItemUtil {
     }
 
     public static boolean isHelmet(@NotNull ItemStack item) {
-        return ENGINE.getNMS().isHelmet(item);
+        return getEquipmentSlot(item) == EquipmentSlot.HEAD;
     }
 
     public static boolean isChestplate(@NotNull ItemStack item) {
-        return ENGINE.getNMS().isChestplate(item);
+        return getEquipmentSlot(item) == EquipmentSlot.CHEST;
     }
 
     public static boolean isLeggings(@NotNull ItemStack item) {
-        return ENGINE.getNMS().isLeggings(item);
+        return getEquipmentSlot(item) == EquipmentSlot.LEGS;
     }
 
     public static boolean isBoots(@NotNull ItemStack item) {
-        return ENGINE.getNMS().isBoots(item);
+        return getEquipmentSlot(item) == EquipmentSlot.FEET;
     }
 
-    @NotNull
-    public static String toJson(@NotNull ItemStack item) {
-        return ENGINE.getNMS().toJSON(item);
+    public static @NotNull EquipmentSlot getEquipmentSlot(@NotNull ItemStack item) {
+        Material material = item.getType();
+        return material.isItem() ? material.getEquipmentSlot() : EquipmentSlot.HAND;
     }
 
-    @NotNull
-    public static String getNBTTag(@NotNull ItemStack item) {
+    public static @NotNull String getNBTTag(@NotNull ItemStack item) {
         return ENGINE.getNMS().getNBTTag(item);
     }
 
-    @Nullable
-    public static String toBase64(@NotNull ItemStack item) {
+    public static @Nullable String toBase64(@NotNull ItemStack item) {
         return ENGINE.getNMS().toBase64(item);
     }
 
-    @NotNull
-    public static List<String> toBase64(@NotNull ItemStack[] item) {
+    public static @NotNull List<String> toBase64(@NotNull ItemStack[] item) {
         return toBase64(Arrays.asList(item));
     }
 
-    @NotNull
-    public static List<String> toBase64(@NotNull List<ItemStack> items) {
+    public static @NotNull List<String> toBase64(@NotNull List<ItemStack> items) {
         return new ArrayList<>(items.stream().map(ItemUtil::toBase64).filter(Objects::nonNull).toList());
     }
 
-    @Nullable
-    public static ItemStack fromBase64(@NotNull String data) {
+    public static @Nullable ItemStack fromBase64(@NotNull String data) {
         return ENGINE.getNMS().fromBase64(data);
     }
 
-    @NotNull
-    public static ItemStack[] fromBase64(@NotNull List<String> list) {
+    public static @NotNull ItemStack[] fromBase64(@NotNull List<String> list) {
         List<ItemStack> items = list.stream().map(ItemUtil::fromBase64).filter(Objects::nonNull).toList();
         return items.toArray(new ItemStack[list.size()]);
     }

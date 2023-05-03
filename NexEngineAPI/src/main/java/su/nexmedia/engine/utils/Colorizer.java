@@ -1,26 +1,19 @@
 package su.nexmedia.engine.utils;
 
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.md_5.bungee.api.ChatColor;
+import org.bukkit.ChatColor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+/**
+ * A util class to handle the legacy color stuff.
+ */
 public class Colorizer {
 
     public static final char AMPERSAND_CHAR = LegacyComponentSerializer.AMPERSAND_CHAR;
-
-    public static final Pattern PATTERN_HEX = Pattern.compile(
-        "#([A-Fa-f0-9]{6})"
-    );
-
-    @NotNull
-    public static String apply(@NotNull String str) {
-        return legacy(str);
-    }
 
     @NotNull
     public static List<String> apply(@NotNull List<String> list) {
@@ -30,7 +23,7 @@ public class Colorizer {
 
     @NotNull
     public static Set<String> apply(@NotNull Set<String> set) {
-        return set.stream().map(Colorizer::apply).collect(Collectors.toSet());
+        return set.stream().map(Colorizer::legacy).collect(Collectors.toSet());
     }
 
     /**
@@ -55,7 +48,7 @@ public class Colorizer {
     /**
      * Translates section ({@code §}) color codes into ampersand ({@code &}) color codes.
      * <p>
-     * It's essentially a reverse of {@link #legacy(String)}.
+     * It's basically a reverse of {@link #legacy(String)}.
      */
     @NotNull
     public static String plain(@NotNull String str) {
@@ -64,8 +57,7 @@ public class Colorizer {
 
     @NotNull
     public static String strip(@NotNull String str) {
-        String stripped = ChatColor.stripColor(str);
-        return stripped == null ? "" : stripped;
+        return ChatColor.stripColor(str);
     }
 
 }

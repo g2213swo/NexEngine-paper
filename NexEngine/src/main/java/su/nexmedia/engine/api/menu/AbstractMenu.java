@@ -1,6 +1,7 @@
 package su.nexmedia.engine.api.menu;
 
 import net.kyori.adventure.text.Component;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -18,21 +19,18 @@ import su.nexmedia.engine.api.manager.ICleanable;
 import su.nexmedia.engine.api.type.ClickType;
 import su.nexmedia.engine.hooks.Hooks;
 import su.nexmedia.engine.hooks.misc.PlaceholderHook;
-import su.nexmedia.engine.utils.ComponentUtil;
-import su.nexmedia.engine.utils.ItemUtil;
-import su.nexmedia.engine.utils.PlayerUtil;
+import su.nexmedia.engine.utils.*;
 
 import java.util.*;
 
-public abstract class AbstractMenu<P extends NexPlugin<P>> extends AbstractListener<P> implements ICleanable, Menu<P> {
+@Deprecated
+public abstract class AbstractMenu<P extends NexPlugin<P>> extends AbstractListener<P> implements ICleanable {
 
     private static final Map<Player, AbstractMenu<?>> PLAYER_MENUS = new WeakHashMap<>();
 
     protected final UUID id;
-    protected final Set<Player> viewers;
     protected final Map<String, MenuItem> items;
-    protected final Map<Player, List<MenuItem>> userItems;
-    protected final Map<Player, int[]> userPage;
+    protected final Map<Player, Pair<Integer, Integer>> viewersMap;
 
     protected Component title;
     protected int size;
@@ -40,10 +38,6 @@ public abstract class AbstractMenu<P extends NexPlugin<P>> extends AbstractListe
     protected JYML cfg;
 
     private MenuListener<P> listener;
-
-    public static @Nullable AbstractMenu<?> getMenu(@NotNull Player player) {
-        return PLAYER_MENUS.get(player);
-    }
 
     public AbstractMenu(@NotNull P plugin, @NotNull JYML cfg, @NotNull String path) {
         this(plugin, cfg.getString(path + "Title", ""), cfg.getInt(path + "Size"));
@@ -65,9 +59,7 @@ public abstract class AbstractMenu<P extends NexPlugin<P>> extends AbstractListe
         this.setInventoryType(InventoryType.CHEST);
 
         this.items = new LinkedHashMap<>();
-        this.userItems = new WeakHashMap<>();
-        this.userPage = new WeakHashMap<>();
-        this.viewers = new HashSet<>();
+        this.viewersMap = new WeakHashMap<>();
 
         this.listener = new MenuListener<>(this);
         this.listener.registerListeners();
@@ -76,19 +68,25 @@ public abstract class AbstractMenu<P extends NexPlugin<P>> extends AbstractListe
 
     @Override
     public void clear() {
-        this.viewers.forEach(Player::closeInventory);
-        this.viewers.clear();
+        this.viewersMap.keySet().forEach(HumanEntity::closeInventory);
+        this.viewersMap.clear();
         this.items.clear();
-        this.userItems.clear();
-        this.userPage.clear();
         this.unregisterListeners();
         this.listener.unregisterListeners();
         this.listener = null;
         this.cfg = null;
     }
 
-    @Override
-    public void onItemClickDefault(@NotNull Player player, @NotNull MenuItemType itemType) {
+    public enum SlotType {
+        EMPTY_PLAYER, EMPTY_MENU, PLAYER, MENU
+    }
+
+    @Nullable
+    public static AbstractMenu<?> getMenu(@NotNull Player player) {
+        return PLAYER_MENUS.get(player);
+    }
+
+    protected void onItemClickDefault(@NotNull Player player, @NotNull MenuItemType itemType) {
         int pageMax = this.getPageMax(player);
         switch (itemType) {
             case CLOSE -> player.closeInventory();
@@ -98,64 +96,65 @@ public abstract class AbstractMenu<P extends NexPlugin<P>> extends AbstractListe
         }
     }
 
-    @Override
     public boolean onPrepare(@NotNull Player player, @NotNull Inventory inventory) {
         return true;
     }
 
-    @Override
     public boolean onReady(@NotNull Player player, @NotNull Inventory inventory) {
         return true;
     }
 
-    @Override
-    public boolean cancelClick(@NotNull InventoryDragEvent event) {
+    public abstract boolean cancelClick(@NotNull InventoryClickEvent e, @NotNull SlotType slotType);
+
+    public boolean cancelClick(@NotNull InventoryDragEvent e) {
         return true;
     }
 
-    @Override
     public boolean open(@NotNull Player player, int page) {
         if (player.isSleeping()) return false;
 
         Inventory inventory;
+        boolean freshOpen = false;
         if (this.isViewer(player)) {
-            this.getUserItemsMap().remove(player);
+            this.resetItemsVisibility(player);
             inventory = player.getOpenInventory().getTopInventory();
             inventory.clear();
         } else {
             inventory = this.createInventory(player);
+            freshOpen = true;
         }
 
         this.setPage(player, page, page);
-        if (!this.onPrepare(player, inventory)) return false;
+        if (!this.onPrepare(player, inventory)) {
+            this.getViewersMap().remove(player);
+            return false;
+        }
         this.setItems(player, inventory);
-        if (!this.onReady(player, inventory)) return false;
-        if (this.getViewers().add(player)) {
+        if (!this.onReady(player, inventory)) {
+            this.getViewersMap().remove(player);
+            return false;
+        }
+        if (freshOpen) {
             player.openInventory(inventory);
         }
         PLAYER_MENUS.put(player, this);
         return true;
     }
 
-    @Override
-    public void addItem(@NotNull ItemStack item, int... slots) {
-        this.addItem(new MenuItemImpl(item, slots));
+    public void update() {
+        this.getViewers().forEach(player -> this.open(player, this.getPage(player)));
     }
 
-    @Override
-    public void addItem(@NotNull Player player, @NotNull ItemStack item, int... slots) {
-        this.addItem(player, new MenuItemImpl(item, slots));
-    }
-
-    @Override
     public void setItems(@NotNull Player player, @NotNull Inventory inventory) {
         // Auto paginator
         int page = this.getPage(player);
         int pages = this.getPageMax(player);
 
-        List<MenuItem> items = new ArrayList<>(this.getItemsMap().values());
-        items.sort(Comparator.comparingInt(MenuItem::getPriority));
-        items.addAll(this.getUserItems(player));
+        List<MenuItem> items = this.getItemsMap().values()
+            .stream()
+            .filter(menuItem -> menuItem.isVisible(player))
+            .sorted(Comparator.comparingInt(MenuItem::getPriority))
+            .toList();
 
         for (MenuItem menuItem : items) {
             if (menuItem.getType() == MenuItemType.PAGE_NEXT) {
@@ -179,19 +178,16 @@ public abstract class AbstractMenu<P extends NexPlugin<P>> extends AbstractListe
         }
     }
 
-    @Override
     public void onItemPrepare(@NotNull Player player, @NotNull MenuItem menuItem, @NotNull ItemStack item) {
         item.editMeta(meta -> {
             // Support PAPI placeholders
             ItemUtil.setPlaceholderAPI(meta, player);
-
-            // Minecraft shows custom displayName & lore with ITALIC by default.
-            // We remove the ITALIC style, leaving it to the end-users to decide.
+            // Minecraft client shows custom displayName & lore with italic by default,
+            // so we remove the italic style, leaving it to the consumer code to decide.
             ItemUtil.removeItalic(meta);
         });
     }
 
-    @Override
     public void onClick(@NotNull Player player, @Nullable ItemStack item, int slot, @NotNull InventoryClickEvent e) {
         if (item == null || item.getType().isAir()) return;
 
@@ -206,11 +202,9 @@ public abstract class AbstractMenu<P extends NexPlugin<P>> extends AbstractListe
         menuItem.getClickCommands(clickType).forEach(command -> PlayerUtil.dispatchCommand(player, command));
     }
 
-    @Override
     public void onClose(@NotNull Player player, @NotNull InventoryCloseEvent e) {
-        this.getUserPageMap().remove(player);
-        this.getUserItemsMap().remove(player);
-        this.getViewers().remove(player);
+        this.getViewersMap().remove(player);
+        this.resetItemsVisibility(player);
 
         PLAYER_MENUS.remove(player);
 
@@ -219,17 +213,95 @@ public abstract class AbstractMenu<P extends NexPlugin<P>> extends AbstractListe
         }
     }
 
-    @Override
-    public @NotNull UUID getId() {
+    protected void resetItemsVisibility(@NotNull Player player) {
+        this.getItemsMap().values().removeIf(menuItem ->
+            menuItem instanceof WeakMenuItem weakMenuItem
+            && weakMenuItem.getWeakPolicy().test(player)
+        );
+        this.getItemsMap().values().forEach(menuItem -> menuItem.resetVisibility(player));
+    }
+
+    public boolean isViewer(@NotNull Player player) {
+        return this.getViewersMap().containsKey(player);
+    }
+
+    @NotNull
+    public Inventory createInventory(@NotNull Player player) {
+        Component title = this.getTitle(player);
+        if (this.getInventoryType() == InventoryType.CHEST) {
+            return this.plugin.getServer().createInventory(null, this.getSize(), title);
+        } else {
+            return this.plugin.getServer().createInventory(null, this.getInventoryType(), title);
+        }
+    }
+
+    @Nullable
+    public MenuItem getItem(@NotNull String id) {
+        return this.getItemsMap().get(id.toLowerCase());
+    }
+
+    @Nullable
+    public MenuItem getItem(int slot) {
+        return this.getItemsMap().values().stream()
+            .filter(item -> ArrayUtil.contains(item.getSlots(), slot))
+            .max(Comparator.comparingInt(MenuItem::getPriority)).orElse(null);
+    }
+
+    @Nullable
+    public MenuItem getItem(@NotNull Player player, int slot) {
+        return this.getItemsMap().values().stream()
+            .filter(menuItem -> ArrayUtil.contains(menuItem.getSlots(), slot) && menuItem.isVisible(player))
+            .max(Comparator.comparingInt(MenuItem::getPriority)).orElse(this.getItem(slot));
+    }
+
+    public void addItem(@NotNull ItemStack item, int... slots) {
+        this.addItem(new MenuItem(item, slots));
+    }
+
+    @Deprecated
+    public void addItem(@NotNull Player player, @NotNull ItemStack item, int... slots) {
+        this.addWeakItem(player, item, slots);
+    }
+
+    public void addItem(@NotNull MenuItem menuItem) {
+        this.getItemsMap().put(menuItem.getId(), menuItem);
+    }
+
+    @Deprecated
+    public void addItem(@NotNull Player player, @NotNull MenuItem menuItem) {
+        WeakMenuItem weakMenuItem = new WeakMenuItem(player, menuItem.getItem(), menuItem.getSlots());
+        weakMenuItem.setClickHandler(menuItem.getClickHandler());
+        weakMenuItem.clickCommands = menuItem.clickCommands;
+        this.addItem(weakMenuItem);
+    }
+
+    public void addWeakItem(@NotNull Player player, @NotNull ItemStack item, int... slots) {
+        this.addItem(new WeakMenuItem(player, item, slots));
+    }
+
+    public int getPage(@NotNull Player player) {
+        return this.getViewersMap().getOrDefault(player, Pair.of(-1, -1)).getFirst();
+    }
+
+    public int getPageMax(@NotNull Player player) {
+        return this.getViewersMap().getOrDefault(player, Pair.of(-1, -1)).getSecond();
+    }
+
+    public void setPage(@NotNull Player player, int pageCurrent, int pageMax) {
+        pageCurrent = Math.max(1, pageCurrent);
+        pageMax = Math.max(1, pageMax);
+        this.getViewersMap().put(player, Pair.of(Math.min(pageCurrent, pageMax), pageMax));
+    }
+
+    @NotNull
+    public UUID getId() {
         return id;
     }
 
-    @Override
     public @NotNull Component getTitle() {
         return this.title;
     }
 
-    @Override
     public @NotNull Component getTitle(@NotNull Player player) {
         Component title = this.getTitle();
         if (Hooks.hasPlaceholderAPI()) {
@@ -238,49 +310,43 @@ public abstract class AbstractMenu<P extends NexPlugin<P>> extends AbstractListe
         return title;
     }
 
-    @Override
     public void setTitle(@NotNull Component title) {
         this.title = title;
     }
 
-    @Override
     public int getSize() {
         return size;
     }
 
-    @Override
     public void setSize(int size) {
         this.size = size;
     }
 
-    @Override
-    public @NotNull InventoryType getInventoryType() {
+    @NotNull
+    public InventoryType getInventoryType() {
         return inventoryType;
     }
 
-    @Override
     public void setInventoryType(@NotNull InventoryType inventoryType) {
         this.inventoryType = inventoryType;
     }
 
-    @Override
-    public @NotNull Map<String, MenuItem> getItemsMap() {
+    @NotNull
+    public Map<String, MenuItem> getItemsMap() {
         return items;
     }
 
-    @Override
-    public @NotNull Map<Player, List<MenuItem>> getUserItemsMap() {
-        return userItems;
+    @NotNull
+    public Set<Player> getViewers() {
+        return this.getViewersMap().keySet();
     }
 
-    @Override
-    public @NotNull Map<Player, int[]> getUserPageMap() {
-        return userPage;
+    @NotNull
+    public Map<Player, Pair<Integer, Integer>> getViewersMap() {
+        return viewersMap;
     }
 
-    @Override
-    public @NotNull Set<Player> getViewers() {
-        return viewers;
+    public boolean destroyWhenNoViewers() {
+        return false;
     }
-
 }

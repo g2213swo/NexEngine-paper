@@ -13,7 +13,6 @@ import su.nexmedia.engine.hooks.misc.FloodgateHook;
 import su.nexmedia.engine.hooks.misc.PlaceholderHook;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -35,12 +34,6 @@ public class PlayerUtil {
             command = PlaceholderHook.setPlaceholders(player, command);
         }
         Bukkit.dispatchCommand(sender, command);
-    }
-
-    @NotNull
-    @Deprecated
-    public static List<String> getPlayerNames() {
-        return CollectionsUtil.playerNames();
     }
 
     public static boolean hasEmptyInventory(@NotNull Player player) {
@@ -131,9 +124,14 @@ public class PlayerUtil {
 
         World world = player.getWorld();
         ItemStack item = item2.clone();
-        item.setAmount(amount);
+
+        int realAmount = Math.min(item.getMaxStackSize(), amount);
+        item.setAmount(realAmount);
         player.getInventory().addItem(item).values().forEach(left -> {
             world.dropItem(player.getLocation(), left);
         });
+
+        amount -= realAmount;
+        if (amount > 0) addItem(player, item2, amount);
     }
 }

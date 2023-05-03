@@ -4,27 +4,25 @@ import java.util.Random;
 
 public class MTRandom extends Random {
 
-    private static final int     UPPER_MASK       = Integer.MIN_VALUE;
-    private static final int     LOWER_MASK       = Integer.MAX_VALUE;
-    private static final int     N                = 624;
-    private static final int     M                = 397;
-    private static final int[]   MAGIC;
-    private static final int     MAGIC_FACTOR1    = 1812433253;
-    private static final int     MAGIC_FACTOR2    = 1664525;
-    private static final int     MAGIC_FACTOR3    = 1566083941;
-    // private static final int MAGIC_MASK1 = -1658038656;
-    // private static final int MAGIC_MASK2 = -272236544;
-    private static final int     MAGIC_SEED       = 19650218;
-    private static final long    DEFAULT_SEED     = 5489L;
+    private static final int UPPER_MASK = Integer.MIN_VALUE;
+    private static final int LOWER_MASK = Integer.MAX_VALUE;
+    private static final int N = 624;
+    private static final int M = 397;
+    private static final int[] MAGIC;
+    private static final int MAGIC_FACTOR1 = 1812433253;
+    private static final int MAGIC_FACTOR2 = 1664525;
+    private static final int MAGIC_FACTOR3 = 1566083941;
+    private static final int MAGIC_SEED = 19650218;
+    private static final long DEFAULT_SEED = 5489L;
 
     static {
         MAGIC = new int[]{0, -1727483681};
     }
 
-    private transient    int[]   mt;
-    private transient    int     mti;
-    private transient    boolean compat;
-    private transient    int[]   ibuf;
+    private transient int[] mt;
+    private transient int mti;
+    private transient boolean compat;
+    private transient int[] ibuf;
 
     public MTRandom() {
         this(false);
@@ -87,8 +85,7 @@ public class MTRandom extends Random {
     public synchronized void setSeed(long seed) {
         if (this.compat) {
             this.setSeed((int) seed);
-        }
-        else {
+        } else {
             if (this.ibuf == null) {
                 this.ibuf = new int[2];
             }

@@ -8,7 +8,10 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.NexPlugin;
-import su.nexmedia.engine.utils.*;
+import su.nexmedia.engine.utils.ComponentUtil;
+import su.nexmedia.engine.utils.MessageUtil;
+import su.nexmedia.engine.utils.Placeholders;
+import su.nexmedia.engine.utils.StringUtil;
 import su.nexmedia.engine.utils.message.NexParser;
 import su.nexmedia.engine.utils.regex.RegexUtil;
 
@@ -103,9 +106,9 @@ public class LangMessage {
             String paramName = entryParams.getKey();
             String paramValue = matcherParam.group(2).stripLeading();
             switch (paramName) {
-                case "type" -> this.type = CollectionsUtil.getEnum(paramValue, OutputType.class);
+                case "type" -> this.type = StringUtil.getEnum(paramValue, OutputType.class).orElse(OutputType.CHAT);
                 case "prefix" -> this.hasPrefix = Boolean.parseBoolean(paramValue);
-                case "sound" -> this.sound = CollectionsUtil.getEnum(paramValue, Sound.class);
+                case "sound" -> this.sound = StringUtil.getEnum(paramValue, Sound.class).orElse(null);
                 case "fadeIn" -> this.titleTimes[0] = StringUtil.getInteger(paramValue, -1);
                 case "stay" -> {
                     this.titleTimes[1] = StringUtil.getInteger(paramValue, -1);
@@ -133,15 +136,17 @@ public class LangMessage {
             switch (option) {
                 case TYPE -> {
                     String[] split = optionValue.split(":");
-                    this.type = CollectionsUtil.getEnum(split[0], OutputType.class);
+                    this.type = StringUtil.getEnum(split[0], OutputType.class).orElse(OutputType.CHAT);
                     if (this.type == OutputType.TITLES) {
                         this.titleTimes[0] = split.length >= 2 ? StringUtil.getInteger(split[1], -1) : -1;
-                        this.titleTimes[1] = split.length >= 3 ? StringUtil.getInteger(split[2], -1) : -1;
+                        this.titleTimes[1] = split.length >= 3 ? StringUtil.getInteger(split[2], -1, true) : -1;
                         this.titleTimes[2] = split.length >= 4 ? StringUtil.getInteger(split[3], -1) : -1;
+
+                        if (this.titleTimes[1] < 0) this.titleTimes[1] = Short.MAX_VALUE;
                     }
                 }
                 case PREFIX -> this.hasPrefix = Boolean.parseBoolean(optionValue);
-                case SOUND -> this.sound = CollectionsUtil.getEnum(optionValue, Sound.class);
+                case SOUND -> this.sound = StringUtil.getEnum(optionValue, Sound.class).orElse(null);
             }
         }
     }
@@ -169,20 +174,14 @@ public class LangMessage {
         this.msgLocalized = msgLocalized;
     }
 
-    @SuppressWarnings("unchecked")
-    public @NotNull LangMessage replace(@NotNull String var, @NotNull Object replacer) {
+    @NotNull
+    public LangMessage replace(@NotNull String var, @NotNull Object replacer) {
         if (this.isEmpty()) return this;
-        if (replacer instanceof List) return this.replace(var, (List<Object>) replacer);
         return this.replace(str -> str.replace(var, String.valueOf(replacer)));
     }
 
-    @Deprecated
-    public @NotNull LangMessage replace(@NotNull String var, @NotNull List<Object> replacer) {
-        if (this.isEmpty()) return this;
-        return this.replace(str -> str.replace(var, String.join("\\n", replacer.stream().map(Object::toString).toList())));
-    }
-
-    public @NotNull LangMessage replace(@NotNull UnaryOperator<String> replacer) {
+    @NotNull
+    public LangMessage replace(@NotNull UnaryOperator<String> replacer) {
         if (this.isEmpty()) return this;
         LangMessage msgCopy = new LangMessage(this);
         msgCopy.setLocalized(replacer.apply(msgCopy.getLocalized()));
@@ -279,7 +278,7 @@ public class LangMessage {
             for (Map.Entry<String, String> entry : this.plugin.getLangManager().getPlaceholders().entrySet()) {
                 str = str.replace(entry.getKey(), entry.getValue());
             }
-            return Placeholders.Plugin.replacer(plugin).apply(str);
+            return Placeholders.PLUGIN.replacer(plugin).apply(str);
         };
     }
 

@@ -2,14 +2,13 @@ package su.nexmedia.engine.hooks;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.api.placeholder.PlaceholderConstants;
 import su.nexmedia.engine.hooks.misc.MythicMobsHook;
 import su.nexmedia.engine.hooks.misc.VaultHook;
-import su.nexmedia.engine.hooks.protection.WorldGuardHook;
-import su.nexmedia.engine.hooks.npc.CitizensHook;
+import su.nexmedia.engine.utils.EntityUtil;
 
 import java.util.Collections;
 import java.util.Map;
@@ -20,10 +19,10 @@ import java.util.stream.Collectors;
 public class Hooks {
 
     public static final String VAULT = "Vault";
-    public static final String CITIZENS = "Citizens";
+    @Deprecated public static final String CITIZENS = "Citizens";
     public static final String PLACEHOLDER_API = "PlaceholderAPI";
-    public static final String MYTHIC_MOBS = "MythicMobs";
-    public static final String WORLD_GUARD = "WorldGuard";
+    @Deprecated public static final String MYTHIC_MOBS = "MythicMobs";
+    @Deprecated public static final String WORLD_GUARD = "WorldGuard";
     public static final String FLOODGATE = "floodgate";
     public static final String BREWERY = "Brewery";
     public static final String INTERACTIVE_BOOKS = "InteractiveBooks";
@@ -52,13 +51,9 @@ public class Hooks {
 
     public static double getGroupValueDouble(@NotNull Player player, @NotNull Map<String, Double> map, boolean isNegaBetter) {
         Set<String> groups = getPermissionGroups(player);
-        // System.out.println("[0] groups of '" + player.getName() + "': " + groups);
-        // System.out.println("[1] map to compare: " + map);
 
-        Optional<Map.Entry<String, Double>> opt = map
-            .entrySet()
-            .stream()
-            .filter(entry -> entry.getKey().equalsIgnoreCase("default") || groups.contains(entry.getKey()))
+        Optional<Map.Entry<String, Double>> opt = map.entrySet().stream()
+            .filter(entry -> entry.getKey().equalsIgnoreCase(PlaceholderConstants.DEFAULT) || groups.contains(entry.getKey()))
             .min((entry1, entry2) -> {
                 double val1 = entry1.getValue();
                 double val2 = entry2.getValue();
@@ -66,9 +61,6 @@ public class Hooks {
                 if (isNegaBetter && val1 < 0) return -1;
                 return (int) (val2 - val1);
             });
-
-        // System.out.println("[2] max value for '" + player.getName() + "': " +
-        // (opt.isPresent() ? opt.get() : "-1x"));
 
         return opt.isPresent() ? opt.get().getValue() : -1D;
     }
@@ -83,17 +75,19 @@ public class Hooks {
         return hasVault() ? VaultHook.getSuffix(player) : "";
     }
 
+    @Deprecated
     public static boolean isCitizensNPC(@NotNull Entity entity) {
-        return hasPlugin(CITIZENS) && CitizensHook.isNPC(entity);
+        return EntityUtil.isNPC(entity);
     }
 
+    @Deprecated
     public static boolean isMythicMob(@NotNull Entity entity) {
         return hasMythicMobs() && MythicMobsHook.isMythicMob(entity);
     }
 
     public static boolean hasPlugin(@NotNull String pluginName) {
         Plugin plugin = Bukkit.getPluginManager().getPlugin(pluginName);
-        return plugin != null; // && p.isEnabled();
+        return plugin != null;
     }
 
     public static boolean hasPlaceholderAPI() {
@@ -104,14 +98,12 @@ public class Hooks {
         return hasPlugin(VAULT);
     }
 
-    public static boolean hasCitizens() {
-        return hasPlugin(CITIZENS);
-    }
-
+    @Deprecated
     public static boolean hasMythicMobs() {
         return hasPlugin(MYTHIC_MOBS);
     }
 
+    @Deprecated
     public static boolean hasWorldGuard() {
         return hasPlugin(WORLD_GUARD);
     }
@@ -134,23 +126,5 @@ public class Hooks {
 
     public static boolean hasMMOItems() {
         return hasPlugin(MMOITEMS);
-    }
-
-    @Deprecated
-    public static boolean canFights(@NotNull Entity attacker, @NotNull Entity victim) {
-        if (attacker.equals(victim)) return false;
-        if (victim.isInvulnerable() || !(victim instanceof LivingEntity)) return false;
-
-        if (isCitizensNPC(victim)) {
-            if (!hasPlugin("Sentinel")) {
-                return false;
-            }
-        }
-
-        if (hasWorldGuard() && !WorldGuardHook.canFights(attacker, victim)) {
-            return false;
-        }
-
-        return true;
     }
 }

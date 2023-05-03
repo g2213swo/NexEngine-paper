@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public final class AlterTableExecutor extends SQLExecutor<Boolean> {
+public final class AlterTableExecutor extends SQLExecutor<Void> {
 
     private final StorageType storageType;
     private final List<SQLValue> columns;
@@ -72,34 +72,33 @@ public final class AlterTableExecutor extends SQLExecutor<Boolean> {
 
     @Override
     @NotNull
-    public Boolean execute(@NotNull AbstractDataConnector connector) {
-        if (this.columns.isEmpty()) return false;
+    public Void execute(@NotNull AbstractDataConnector connector) {
+        if (this.columns.isEmpty()) return null;
 
         if (this.type == Type.ADD_COLUMN) {
-            return this.columns.stream().allMatch(value -> {
-                if (SQLQueries.hasColumn(connector, this.table, value.getColumn())) return false;
+            this.columns.forEach(value -> {
+                if (SQLQueries.hasColumn(connector, this.table, value.getColumn())) return;
 
                 String sql = "ALTER TABLE " + this.table + " ADD "
                              + value.getColumn().getName() + " " + value.getColumn().formatType(this.storageType)
                              + " DEFAULT '" + value.getValue() + "'";
-                return SQLQueries.executeStatement(connector, sql);
+                SQLQueries.executeStatement(connector, sql);
             });
         } else if (this.type == Type.RENAME_COLUMN) {
-            return this.columns.stream().allMatch(value -> {
-                if (!SQLQueries.hasColumn(connector, this.table, value.getColumn())) return false;
+            this.columns.forEach(value -> {
+                if (!SQLQueries.hasColumn(connector, this.table, value.getColumn())) return;
 
                 String sql = "ALTER TABLE " + this.table + " RENAME COLUMN " + value.getColumn().getName() + " TO " + value.getValue();
-                return SQLQueries.executeStatement(connector, sql);
+                SQLQueries.executeStatement(connector, sql);
             });
         } else if (this.type == Type.DROP_COLUMN) {
-            return this.columns.stream().allMatch(value -> {
-                if (!SQLQueries.hasColumn(connector, this.table, value.getColumn())) return false;
+            this.columns.forEach(value -> {
+                if (!SQLQueries.hasColumn(connector, this.table, value.getColumn())) return;
 
                 String sql = "ALTER TABLE " + this.table + " DROP COLUMN " + value.getColumn().getName();
-                return SQLQueries.executeStatement(connector, sql);
+                SQLQueries.executeStatement(connector, sql);
             });
         }
-
-        return true;
+        return null;
     }
 }

@@ -7,15 +7,12 @@ import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.utils.random.Rnd;
 
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class StringUtil {
-
-    @Deprecated
-    public static final Pattern HEX_PATTERN = Pattern.compile("#([A-Fa-f0-9]{6})");
 
     @Contract(pure = true)
     public static @NotNull String oneSpace(@NotNull String str) {
@@ -26,101 +23,75 @@ public class StringUtil {
         return str.trim().replaceAll("\\s+", "");
     }
 
-    /**
-     * Translates ampersand ({@code &}) color codes into section ({@code §}) color codes.
-     * <p>
-     * The translation supports three different RGB formats:
-     * <ul>
-     *     <li>Legacy Mojang color and formatting codes (such as §a or §l)</li>
-     *     <li>Adventure-specific RGB format (such as §#a25981)</li>
-     *     <li>BungeeCord RGB color code format (such as §x§a§2§5§9§8§1)</li>
-     * </ul>
-     *
-     * @param str a legacy text where its color codes are in <b>ampersand</b> {@code &} format
-     *
-     * @return a legacy text where its color codes are in <b>section</b> {@code §} format
-     *
-     * @deprecated in favor of {@link Colorizer#legacy(String)}
-     */
-    @Deprecated
-    @Contract(pure = true)
-    public static @NotNull String color(@NotNull String str) {
-        return Colorizer.legacy(str);
-    }
+    @NotNull
+    public static String replaceEach(@NotNull String text, @NotNull List<Pair<String, Supplier<String>>> replacements) {
+        if (text.isEmpty() || replacements.isEmpty())
+            return text;
 
-    /**
-     * Converts given legacy text into plain text.
-     *
-     * @param legacy a text containing legacy color codes
-     *
-     * @return a plain text
-     */
-    @Deprecated
-    @Contract(pure = true)
-    public static @NotNull String asPlainText(@NotNull String legacy) {
-        return Colorizer.strip(legacy);
-    }
+        final int searchLength = replacements.size();
+        // keep track of which still have matches
+        final boolean[] noMoreMatchesForReplIndex = new boolean[searchLength];
 
-    @Contract(pure = true)
-    public static @NotNull Color parseColor(@NotNull String colorRaw) {
-        String[] rgb = colorRaw.split(",");
-        int red = getInteger(rgb[0], 0);
-        if (red < 0) red = Rnd.get(255);
+        // index on index that the match was found
+        int textIndex = -1;
+        int replaceIndex = -1;
+        int tempIndex;
 
-        int green = rgb.length >= 2 ? getInteger(rgb[1], 0) : 0;
-        if (green < 0) green = Rnd.get(255);
+        // index of replace array that will replace the search string found
+        // NOTE: logic duplicated below START
+        for (int i = 0; i < searchLength; i++) {
+            if (noMoreMatchesForReplIndex[i])
+                continue;
+            tempIndex = text.indexOf(replacements.get(i).getFirst());
 
-        int blue = rgb.length >= 3 ? getInteger(rgb[2], 0) : 0;
-        if (blue < 0) blue = Rnd.get(255);
+            // see if we need to keep searching for this
+            if (tempIndex == -1) {
+                noMoreMatchesForReplIndex[i] = true;
+            } else if (textIndex == -1 || tempIndex < textIndex) {
+                textIndex = tempIndex;
+                replaceIndex = i;
+            }
+        }
+        // NOTE: logic mostly below END
 
-        return Color.fromRGB(red, green, blue);
-    }
+        // no search strings found, we are done
+        if (textIndex == -1)
+            return text;
 
-    @Deprecated
-    @Contract(pure = true)
-    public static @NotNull String colorRaw(@NotNull String str) {
-        return Colorizer.plain(str);
-    }
+        int start = 0;
+        final StringBuilder buf = new StringBuilder();
+        while (textIndex != -1) {
+            for (int i = start; i < textIndex; i++) {
+                buf.append(text.charAt(i));
+            }
+            buf.append(replacements.get(replaceIndex).getSecond().get());
 
-    @Deprecated
-    @Contract(pure = false)
-    public static @NotNull List<String> color(@NotNull List<String> list) {
-        return Colorizer.apply(list);
-    }
+            start = textIndex + replacements.get(replaceIndex).getFirst().length();
 
-    @Deprecated
-    @Contract(pure = true)
-    public static @NotNull Set<String> color(@NotNull Set<String> set) {
-        return Colorizer.apply(set);
-    }
+            textIndex = -1;
+            replaceIndex = -1;
+            // find the next earliest match
+            // NOTE: logic mostly duplicated above START
+            for (int i = 0; i < searchLength; i++) {
+                if (noMoreMatchesForReplIndex[i])
+                    continue;
+                tempIndex = text.indexOf(replacements.get(i).getFirst(), start);
 
-    /**
-     * @see #replace(List, String, boolean, List)
-     * @deprecated in favor of {@link #replacePlaceholderList(String, List, List)}
-     */
-    @Deprecated
-    @Contract(pure = true)
-    public static @NotNull List<String> replace(@NotNull List<String> oldList, @NotNull String placeholder, boolean keep, @NotNull String... replacer) {
-        return replacePlaceholderList(placeholder, oldList, Arrays.asList(replacer));
-    }
+                // see if we need to keep searching for this
+                if (tempIndex == -1) {
+                    noMoreMatchesForReplIndex[i] = true;
+                } else if (textIndex == -1 || tempIndex < textIndex) {
+                    textIndex = tempIndex;
+                    replaceIndex = i;
+                }
+            }
+            // NOTE: logic duplicated above END
 
-
-    /**
-     * Modifies the list of strings such that the new list has the given placeholder replaced by the given replacer.
-     *
-     * @param oldList     the list of strings to which the replacement is applied
-     * @param placeholder the placeholder contained in the list of strings
-     * @param keep        true to keep other contents around the placeholder
-     * @param replacer    the new list of strings replacing the placeholder
-     *
-     * @return a modified copy of the list
-     *
-     * @deprecated in favor of {@link #replacePlaceholderList(String, List, List)}
-     */
-    @Deprecated
-    @Contract(pure = true)
-    public static @NotNull List<String> replace(@NotNull List<String> oldList, @NotNull String placeholder, boolean keep, @NotNull List<String> replacer) {
-        return replacePlaceholderList(placeholder, oldList, replacer);
+        }
+        final int textLength = text.length();
+        for (int i = start; i < textLength; i++)
+            buf.append(text.charAt(i));
+        return buf.toString();
     }
 
     @SafeVarargs
@@ -273,6 +244,25 @@ public class StringUtil {
         }
     }
 
+    @Contract(pure = true)
+    public static @NotNull Color parseColor(@NotNull String colorRaw) {
+        String[] rgb = colorRaw.split(",");
+        int red = getInteger(rgb[0], 0);
+        if (red < 0) red = Rnd.get(255);
+
+        int green = rgb.length >= 2 ? getInteger(rgb[1], 0) : 0;
+        if (green < 0) green = Rnd.get(255);
+
+        int blue = rgb.length >= 3 ? getInteger(rgb[2], 0) : 0;
+        if (blue < 0) blue = Rnd.get(255);
+
+        return Color.fromRGB(red, green, blue);
+    }
+
+    public static @NotNull String lowerCaseUnderscore(@NotNull String str) {
+        return Colorizer.strip(str).toLowerCase().replace(" ", "_");
+    }
+
     public static @NotNull String capitalizeUnderscored(@NotNull String str) {
         return capitalizeFully(str.replace("_", " "));
     }
@@ -314,29 +304,29 @@ public class StringUtil {
     }
 
     @Contract(pure = true)
-    public static @NotNull List<String> getByPartialMatches(@NotNull List<String> originals, @NotNull String token) {
+    public static @NotNull List<String> getByPartialMatches(@NotNull List<String> original, @NotNull String token) {
         String tokenLowerCase = token.toLowerCase();
         List<String> matches = new ArrayList<>();
-        org.bukkit.util.StringUtil.copyPartialMatches(tokenLowerCase, originals, matches);
+        org.bukkit.util.StringUtil.copyPartialMatches(tokenLowerCase, original, matches);
         return matches;
     }
 
-    public static @NotNull String extractCommandName(@NotNull String cmd) {
-        String cmdFull = asPlainText(cmd).split(" ")[0];
-        String cmdName = cmdFull.replace("/", "").replace("\\/", "");
-        String[] pluginPrefix = cmdName.split(":");
+    public static @NotNull String extractCommandName(@NotNull String command) {
+        String commandName = Colorizer.strip(command).split(" ")[0].substring(1);
+        String[] pluginPrefix = commandName.split(":");
         if (pluginPrefix.length == 2) {
-            cmdName = pluginPrefix[1];
+            commandName = pluginPrefix[1];
         }
-
-        return cmdName;
+        return commandName;
     }
 
+    @Deprecated
     public static boolean isCustomBoolean(@NotNull String str) {
         String[] customs = new String[]{"0", "1", "on", "off", "true", "false", "yes", "no"};
         return Stream.of(customs).collect(Collectors.toSet()).contains(str.toLowerCase());
     }
 
+    @Deprecated
     public static boolean parseCustomBoolean(@NotNull String str) {
         if (str.equalsIgnoreCase("0") || str.equalsIgnoreCase("off") || str.equalsIgnoreCase("no")) {
             return false;
@@ -346,63 +336,4 @@ public class StringUtil {
         }
         return Boolean.parseBoolean(str);
     }
-
-    public static @NotNull String c(@NotNull String s) {
-        char[] ch = s.toCharArray();
-        char[] out = new char[ch.length * 2];
-        int i = 0;
-        for (char c : ch) {
-            int orig = Character.getNumericValue(c);
-            int min;
-            int max;
-
-            char cas;
-            if (Character.isUpperCase(c)) {
-                min = Character.getNumericValue('A');
-                max = Character.getNumericValue('Z');
-                cas = 'q';
-            } else {
-                min = Character.getNumericValue('a');
-                max = Character.getNumericValue('z');
-                cas = 'p';
-            }
-
-            int pick = min + (max - orig);
-            char get = Character.forDigit(pick, Character.MAX_RADIX);
-            out[i] = get;
-            out[++i] = cas;
-            i++;
-        }
-        return String.valueOf(out);
-    }
-
-    public static @NotNull String d(@NotNull String s) {
-        char[] ch = s.toCharArray();
-        char[] dec = new char[ch.length / 2];
-        for (int i = 0; i < ch.length; i = i + 2) {
-            int j = i;
-            char letter = ch[j];
-            char cas = ch[++j];
-            boolean upper = cas == 'q';
-
-            int max;
-            int min;
-            if (upper) {
-                min = Character.getNumericValue('A');
-                max = Character.getNumericValue('Z');
-            } else {
-                min = Character.getNumericValue('a');
-                max = Character.getNumericValue('z');
-            }
-
-            int orig = max - Character.getNumericValue(letter) + min;
-            char get = Character.forDigit(orig, Character.MAX_RADIX);
-            if (upper)
-                get = Character.toUpperCase(get);
-
-            dec[i / 2] = get;
-        }
-        return String.valueOf(dec);
-    }
-
 }

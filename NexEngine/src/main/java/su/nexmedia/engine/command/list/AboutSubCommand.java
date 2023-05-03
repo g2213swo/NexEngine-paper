@@ -44,7 +44,6 @@ public class AboutSubCommand<P extends NexPlugin<P>> extends AbstractCommand<P> 
             "",
             "<dark_green>Powered by <green><b>" + NexEngine.get().getName() + "</b></green>, © 2019-2022"
         );
-
         info.forEach(text -> MessageUtil.sendMessage(sender, text));
     }
 }

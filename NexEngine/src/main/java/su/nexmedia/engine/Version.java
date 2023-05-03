@@ -6,8 +6,23 @@ import org.jetbrains.annotations.NotNull;
 public enum Version {
 
     // KEEP VERSIONS LIST FROM LOWER TO HIGHER
-    V1_17_R1, V1_18_R2, V1_19_R2,
+    V1_17_R1("1.17.1"),
+    V1_18_R2("1.18.2"),
+    V1_19_R1("1.19.2"),
+    V1_19_R2("1.19.3"),
+    V1_19_R3("1.19.4"),
     ;
+
+    private final String localized;
+
+    Version(@NotNull String localized) {
+        this.localized = localized;
+    }
+
+    @NotNull
+    public String getLocalized() {
+        return localized;
+    }
 
     public static final Version CURRENT;
 
@@ -17,8 +32,7 @@ public enum Version {
 
         try {
             CURRENT = Version.valueOf(versionRaw.toUpperCase());
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             e.printStackTrace();
             throw e;
         }
@@ -30,6 +44,10 @@ public enum Version {
 
     public boolean isHigher(@NotNull Version version) {
         return this.ordinal() > version.ordinal();
+    }
+
+    public static boolean isAtLeast(@NotNull Version version) {
+        return version.isCurrent() || CURRENT.isHigher(version);
     }
 
     public static boolean isAbove(@NotNull Version version) {

@@ -7,13 +7,13 @@ import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.NexPlugin;
 import su.nexmedia.engine.api.editor.EditorButtonType;
 import su.nexmedia.engine.api.menu.AbstractMenuAuto;
-import su.nexmedia.engine.api.menu.MenuItem;
 import su.nexmedia.engine.api.menu.MenuClick;
-import su.nexmedia.engine.api.menu.MenuItemImpl;
+import su.nexmedia.engine.api.menu.MenuItem;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Deprecated
 public abstract class AbstractEditorMenuAuto<P extends NexPlugin<P>, T, L> extends AbstractMenuAuto<P, L> {
 
     protected final T parent;
@@ -29,7 +29,7 @@ public abstract class AbstractEditorMenuAuto<P extends NexPlugin<P>, T, L> exten
 
         types.forEach((editorType, slot) -> {
             ItemStack item = editorType.getItem();
-            MenuItem menuItem = new MenuItemImpl(item, (Enum<?>) editorType, slot);
+            MenuItem menuItem = new MenuItem(item, (Enum<?>) editorType, slot);
             menuItem.setClickHandler(click);
             this.addItem(menuItem);
         });

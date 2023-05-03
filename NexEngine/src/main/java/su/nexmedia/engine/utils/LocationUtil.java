@@ -10,7 +10,6 @@ import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.NexEngine;
-import su.nexmedia.engine.lang.LangManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -64,18 +63,6 @@ public class LocationUtil {
     }
 
     @NotNull
-    @Deprecated
-    public static String getWorldName(@NotNull World world) {
-        return LangManager.getWorld(world);
-    }
-
-    @NotNull
-    @Deprecated
-    public static List<String> getWorldNames() {
-        return CollectionsUtil.worldNames();
-    }
-
-    @NotNull
     public static Location getFirstGroundBlock(@NotNull Location loc) {
         float yaw = loc.getYaw();
         float pitch = loc.getPitch();
@@ -112,7 +99,7 @@ public class LocationUtil {
     }
 
     private static double getRelativeCoord(double cord) {
-        return cord < 0 ? cord + 0.5 : cord + 0.5;
+        return cord < 0 ? cord - 0.5 : cord + 0.5;
     }
 
     @NotNull

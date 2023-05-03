@@ -7,7 +7,7 @@ public interface ColumnFormer {
 
     ColumnFormer STRING = (storageType, length) -> {
         if (length < 1 || storageType == StorageType.SQLITE) {
-            return "TEXT NOT NULL";
+            return storageType == StorageType.SQLITE ? "TEXT NOT NULL" : "MEDIUMTEXT NOT NULL";
         }
         return "varchar(" + length + ") CHARACTER SET utf8 NOT NULL";
     };
@@ -24,7 +24,7 @@ public interface ColumnFormer {
     };
 
     ColumnFormer LONG = (storageType, length) -> {
-        return storageType == StorageType.SQLITE ? "BIGINT NOT NULL" : "bigint(" + length + ") NOT NULL";
+        return length < 1 || storageType == StorageType.SQLITE ? "BIGINT NOT NULL" : "bigint(" + length + ") NOT NULL";
     };
 
     ColumnFormer BOOLEAN = (storageType, length) -> {

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@Deprecated
 public abstract class AbstractMenuAuto<P extends NexPlugin<P>, I> extends AbstractMenu<P> {
 
     public AbstractMenuAuto(@NotNull P plugin, @NotNull JYML cfg, @NotNull String path) {
@@ -26,6 +27,11 @@ public abstract class AbstractMenuAuto<P extends NexPlugin<P>, I> extends Abstra
 
     @NotNull
     protected abstract List<I> getObjects(@NotNull Player player);
+
+    @NotNull
+    protected List<I> fineObjects(@NotNull List<I> objects, @NotNull Player player) {
+        return objects;
+    }
 
     @NotNull
     protected abstract ItemStack getObjectStack(@NotNull Player player, @NotNull I object);
@@ -44,12 +50,14 @@ public abstract class AbstractMenuAuto<P extends NexPlugin<P>, I> extends Abstra
         if (pages < 1) list = Collections.emptyList();
         else list = split.get(page - 1);
 
+        list = this.fineObjects(list, player);
+
         int count = 0;
         for (I object : list) {
             ItemStack item = this.getObjectStack(player, object);
-            MenuItem menuItem = new MenuItemImpl(item, this.getObjectSlots()[count++]);
+            WeakMenuItem menuItem = new WeakMenuItem(player, item, this.getObjectSlots()[count++]);
             menuItem.setClickHandler(this.getObjectClick(player, object));
-            this.addItem(player, menuItem);
+            this.addItem(menuItem);
         }
         this.setPage(player, page, pages);
         return true;

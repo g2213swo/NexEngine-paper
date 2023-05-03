@@ -1,16 +1,12 @@
 package su.nexmedia.engine.api.particle;
 
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Particle;
+import org.bukkit.*;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.utils.EffectUtil;
 import su.nexmedia.engine.utils.StringUtil;
 
 public class SimpleParticle {
@@ -91,6 +87,32 @@ public class SimpleParticle {
         return data;
     }
 
+    @NotNull
+    public SimpleParticle parseData(@NotNull String from) {
+        String[] split = from.split(" ");
+        Class<?> dataType = this.getParticle().getDataType();
+        Object data = null;
+        if (dataType == BlockData.class) {
+            Material material = Material.getMaterial(from.toUpperCase());
+            data = material != null ? material.createBlockData() : Material.STONE.createBlockData();
+        } else if (dataType == Particle.DustOptions.class) {
+            Color color = StringUtil.parseColor(split[0]);
+            double size = split.length >= 2 ? StringUtil.getDouble(split[1], 1D) : 1D;
+            data = new Particle.DustOptions(color, (float) size);
+        } else if (dataType == Particle.DustTransition.class) {
+            Color colorStart = StringUtil.parseColor(split[0]);
+            Color colorEnd = split.length >= 2 ? StringUtil.parseColor(split[1]) : colorStart;
+            double size = split.length >= 3 ? StringUtil.getDouble(split[2], 1D) : 1D;
+            data = new Particle.DustTransition(colorStart, colorEnd, 1.0f);
+        } else if (dataType == ItemStack.class) {
+            Material material = Material.getMaterial(from.toUpperCase());
+            if (material != null && !material.isAir()) data = new ItemStack(material);
+            else data = new ItemStack(Material.STONE);
+        } else if (dataType != Void.class) return SimpleParticle.of(Particle.REDSTONE);
+
+        return SimpleParticle.of(this.getParticle(), data);
+    }
+
     public void play(@NotNull Location location, double speed, int amount) {
         this.play(location, 0D, speed, amount);
     }
@@ -113,9 +135,14 @@ public class SimpleParticle {
 
     public void play(@Nullable Player player, @NotNull Location location, double xOffset, double yOffset, double zOffset, double speed, int amount) {
         if (player == null) {
-            EffectUtil.playParticle(location, this.getParticle(), this.getData(), xOffset, yOffset, zOffset, speed, amount);
+            World world = location.getWorld();
+            if (world == null) return;
+
+            world.spawnParticle(this.getParticle(), location, amount, xOffset, yOffset, zOffset, speed, this.getData());
+            // EffectUtil.playParticle(location, this.getParticle(), this.getData(), xOffset, yOffset, zOffset, speed, amount);
         } else {
-            EffectUtil.playParticle(player, location, this.getParticle(), this.getData(), xOffset, yOffset, zOffset, speed, amount);
+            player.spawnParticle(this.getParticle(), location, amount, xOffset, yOffset, zOffset, speed, this.getData());
+            // EffectUtil.playParticle(player, location, this.getParticle(), this.getData(), xOffset, yOffset, zOffset, speed, amount);
         }
     }
 }

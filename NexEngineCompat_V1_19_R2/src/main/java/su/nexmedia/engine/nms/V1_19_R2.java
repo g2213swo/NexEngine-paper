@@ -1,112 +1,28 @@
 package su.nexmedia.engine.nms;
 
-import com.google.common.collect.Multimap;
-import io.netty.channel.Channel;
-import net.minecraft.core.BlockPos;
+import io.papermc.paper.adventure.PaperAdventure;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.item.*;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.block.state.BlockState;
-import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_19_R2.CraftWorld;
+import net.minecraft.world.inventory.MenuType;
 import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_19_R2.inventory.CraftItemStack;
-import org.bukkit.craftbukkit.v1_19_R2.util.CraftChatMessage;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.math.BigInteger;
-import java.util.Collection;
-import java.util.List;
 
+@Deprecated
 public class V1_19_R2 implements NMS {
-
-    @Override
-    @NotNull
-    public Channel getChannel(@NotNull Player player) {
-        return ((CraftPlayer) player).getHandle().connection.getConnection().channel;
-    }
-
-    @Override
-    public void sendPacket(@NotNull Player player, @NotNull Object packet) {
-        ((CraftPlayer) player).getHandle().connection.send((Packet<?>) packet);
-    }
-
-    @Override
-    public void sendAttackPacket(@NotNull Player p, int id) {
-        CraftPlayer player = (CraftPlayer) p;
-        Entity entity = player.getHandle();
-        ClientboundAnimatePacket packet = new ClientboundAnimatePacket(entity, id);
-        player.getHandle().connection.send(packet);
-    }
-
-    @Override
-    public boolean breakBlock(@NotNull Player player, @NotNull Block block) {
-        BlockPos position = new BlockPos(block.getX(), block.getY(), block.getZ());
-        ServerPlayer entityPlayer = ((CraftPlayer) player).getHandle();
-        ServerPlayerGameMode manager = entityPlayer.gameMode;
-        return manager.destroyBlock(position);
-    }
-
-    @Override
-    public float getBlockDurability(@NotNull Block block) {
-        BlockPos pos = new BlockPos(block.getX(), block.getY(), block.getZ());
-        BlockBehaviour.BlockStateBase blockData = ((CraftWorld) block.getWorld()).getHandle().getBlockState(pos);
-        return blockData.getBlock().getExplosionResistance();
-    }
-
-    @Override
-    public float getBlockStrength(@NotNull Block block) {
-        BlockPos pos = new BlockPos(block.getX(), block.getY(), block.getZ());
-        BlockBehaviour.BlockStateBase blockData = ((CraftWorld) block.getWorld()).getHandle().getBlockState(pos);
-        return blockData.destroySpeed;
-    }
-
-    @Override
-    @NotNull
-    public List<ItemStack> getBlockDrops(@NotNull Block block, @NotNull Player player, @NotNull ItemStack tool) {
-        BlockPos position = new BlockPos(block.getX(), block.getY(), block.getZ());
-
-        ServerLevel nmsWorld = ((CraftWorld) player.getWorld()).getHandle();
-        BlockState nmsData = nmsWorld.getBlockState(position);
-        BlockEntity nmsTile = nmsWorld.getBlockEntity(position);
-        net.minecraft.world.item.ItemStack nmsItem = CraftItemStack.asNMSCopy(tool);
-
-        ServerPlayer entityPlayer = ((CraftPlayer) player).getHandle();
-
-        return net.minecraft.world.level.block.Block.getDrops(
-            nmsData, nmsWorld.getMinecraftWorld(), position, nmsTile, entityPlayer, nmsItem)
-            .stream().map(CraftItemStack::asBukkitCopy).toList();
-    }
-
-    @Override
-    @NotNull
-    public String toJSON(@NotNull ItemStack item) {
-        net.minecraft.world.item.ItemStack nmsItem = CraftItemStack.asNMSCopy(item);
-        String json = nmsItem.save(new CompoundTag()).toString();
-        if (json.length() > Short.MAX_VALUE) {
-            ItemStack item2 = new ItemStack(item.getType());
-            return toJSON(item2);
-        }
-        return json;
-    }
 
     @Override
     @NotNull
@@ -128,8 +44,7 @@ public class V1_19_R2 implements NMS {
 
         try {
             NbtIo.write(nbtTagCompoundItem, dataOutput);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
@@ -165,138 +80,42 @@ public class V1_19_R2 implements NMS {
         return CraftItemStack.asBukkitCopy(nmsStack);
     }
 
-    @Override
-    @NotNull
-    public String fixColors(@NotNull String str) {
-        Component baseComponent = CraftChatMessage.fromStringOrNull(str, true);
-        return CraftChatMessage.fromComponent(baseComponent);
-    }
+    public void updateMenuTitle(@NotNull Player player, @NotNull String title) {
+        Inventory menu = player.getOpenInventory().getTopInventory();
+        MenuType<?> type = switch (menu.getType()) {
+            case DISPENSER, DROPPER, WORKBENCH -> MenuType.GENERIC_3x3;
+            case FURNACE -> MenuType.FURNACE;
+            case ENCHANTING -> MenuType.ENCHANTMENT;
+            case BREWING -> MenuType.BREWING_STAND;
+            case MERCHANT -> MenuType.MERCHANT;
+            case ENDER_CHEST, BARREL -> MenuType.GENERIC_9x3;
+            case ANVIL -> MenuType.ANVIL;
+            case SMITHING -> MenuType.SMITHING;
+            case BEACON -> MenuType.BEACON;
+            case HOPPER -> MenuType.HOPPER;
+            case SHULKER_BOX -> MenuType.SHULKER_BOX;
+            case BLAST_FURNACE -> MenuType.BLAST_FURNACE;
+            case LECTERN -> MenuType.LECTERN;
+            case SMOKER -> MenuType.SMOKER;
+            case LOOM -> MenuType.LOOM;
+            case CARTOGRAPHY -> MenuType.CARTOGRAPHY_TABLE;
+            case GRINDSTONE -> MenuType.GRINDSTONE;
+            case STONECUTTER -> MenuType.STONECUTTER;
+            case COMPOSTER, PLAYER, CREATIVE, CRAFTING, CHISELED_BOOKSHELF -> null;
+            default -> switch (menu.getSize()) {
+                case 9 -> MenuType.GENERIC_9x1;
+                case 18 -> MenuType.GENERIC_9x2;
+                case 36 -> MenuType.GENERIC_9x4;
+                case 45 -> MenuType.GENERIC_9x5;
+                case 54 -> MenuType.GENERIC_9x6;
+                default -> MenuType.GENERIC_9x3;
+            };
+        };
+        if (type == null) return;
 
-    @Override
-    public double getDefaultDamage(@NotNull ItemStack itemStack) {
-        return this.getAttributeValue(itemStack, Attributes.ATTACK_DAMAGE);
-    }
-
-    @Override
-    public double getDefaultSpeed(@NotNull ItemStack itemStack) {
-        return this.getAttributeValue(itemStack, Attributes.MOVEMENT_SPEED);
-    }
-
-    @Override
-    public double getDefaultArmor(@NotNull ItemStack itemStack) {
-        return this.getAttributeValue(itemStack, Attributes.ARMOR);
-    }
-
-    @Override
-    public double getDefaultToughness(@NotNull ItemStack itemStack) {
-        return this.getAttributeValue(itemStack, Attributes.ARMOR_TOUGHNESS);
-    }
-
-    @Nullable
-    private Multimap<Attribute, AttributeModifier> getAttributes(@NotNull ItemStack itemStack) {
-        Item item = CraftItemStack.asNMSCopy(itemStack).getItem();
-        Multimap<Attribute, AttributeModifier> attMap = null;
-
-        if (item instanceof ArmorItem armorItem) {
-            attMap = armorItem.getDefaultAttributeModifiers(armorItem.getSlot());
-        }
-        else if (item instanceof DiggerItem diggerItem) {
-            attMap = diggerItem.getDefaultAttributeModifiers(EquipmentSlot.MAINHAND);
-        }
-        else if (item instanceof SwordItem swordItem) {
-            attMap = swordItem.getDefaultAttributeModifiers(EquipmentSlot.MAINHAND);
-        }
-        else if (item instanceof TridentItem tridentItem) {
-            attMap = tridentItem.getDefaultAttributeModifiers(EquipmentSlot.MAINHAND);
-        }
-
-        return attMap;
-    }
-
-    private double getAttributeValue(@NotNull ItemStack item, @NotNull Attribute base) {
-        Multimap<Attribute, AttributeModifier> attMap = this.getAttributes(item);
-        if (attMap == null) return 0D;
-
-        Collection<AttributeModifier> att = attMap.get(base);
-        return att.isEmpty() ? 0 : att.stream().findFirst().get().getAmount();
-    }
-
-
-    @Override
-    public boolean isTool(@NotNull ItemStack itemStack) {
-        Item item = CraftItemStack.asNMSCopy(itemStack).getItem();
-        return item instanceof DiggerItem;
-    }
-
-    @Override
-    public boolean isArmor(@NotNull ItemStack itemStack) {
-        Item item = CraftItemStack.asNMSCopy(itemStack).getItem();
-        return item instanceof ArmorItem;
-    }
-
-    @Override
-    public boolean isWearable(@NotNull ItemStack itemStack) {
-        Item item = CraftItemStack.asNMSCopy(itemStack).getItem();
-        return item instanceof Wearable;
-    }
-
-
-    @Override
-    public boolean isSword(@NotNull ItemStack itemStack) {
-        Item item = CraftItemStack.asNMSCopy(itemStack).getItem();
-        return item instanceof SwordItem;
-    }
-
-    @Override
-    public boolean isAxe(@NotNull ItemStack itemStack) {
-        Item item = CraftItemStack.asNMSCopy(itemStack).getItem();
-        return item instanceof AxeItem;
-    }
-
-    @Override
-    public boolean isPickaxe(@NotNull ItemStack itemStack) {
-        Item item = CraftItemStack.asNMSCopy(itemStack).getItem();
-        return item instanceof PickaxeItem;
-    }
-
-    @Override
-    public boolean isShovel(@NotNull ItemStack itemStack) {
-        Item item = CraftItemStack.asNMSCopy(itemStack).getItem();
-        return item instanceof ShovelItem;
-    }
-
-    @Override
-    public boolean isHoe(@NotNull ItemStack itemStack) {
-        Item item = CraftItemStack.asNMSCopy(itemStack).getItem();
-        return item instanceof HoeItem;
-    }
-
-
-    private boolean isArmorSlot(@NotNull ItemStack itemStack, @NotNull EquipmentSlot slot) {
-        Item item = CraftItemStack.asNMSCopy(itemStack).getItem();
-        if (item instanceof ArmorItem armor) {
-            return armor.getSlot() == slot;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean isHelmet(@NotNull ItemStack itemStack) {
-        return this.isArmorSlot(itemStack, EquipmentSlot.HEAD);
-    }
-
-    @Override
-    public boolean isChestplate(@NotNull ItemStack itemStack) {
-        return this.isArmorSlot(itemStack, EquipmentSlot.CHEST);
-    }
-
-    @Override
-    public boolean isLeggings(@NotNull ItemStack itemStack) {
-        return this.isArmorSlot(itemStack, EquipmentSlot.LEGS);
-    }
-
-    @Override
-    public boolean isBoots(@NotNull ItemStack itemStack) {
-        return this.isArmorSlot(itemStack, EquipmentSlot.FEET);
+        ServerPlayer serverPlayer = ((CraftPlayer) player).getHandle();
+        ClientboundOpenScreenPacket packet = new ClientboundOpenScreenPacket(serverPlayer.containerMenu.containerId, type, PaperAdventure.asVanilla(MiniMessage.miniMessage().deserialize(title)));
+        serverPlayer.connection.send(packet);
+        player.updateInventory();
     }
 }

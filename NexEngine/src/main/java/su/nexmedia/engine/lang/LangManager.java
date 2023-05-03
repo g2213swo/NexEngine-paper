@@ -11,6 +11,7 @@ import su.nexmedia.engine.NexEngine;
 import su.nexmedia.engine.NexPlugin;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.editor.EditorButtonType;
+import su.nexmedia.engine.api.editor.EditorLocale;
 import su.nexmedia.engine.api.lang.LangKey;
 import su.nexmedia.engine.api.lang.LangMessage;
 import su.nexmedia.engine.api.manager.AbstractManager;
@@ -153,6 +154,30 @@ public class LangManager<P extends NexPlugin<P>> extends AbstractManager<P> {
         this.getConfig().saveChanges();
     }
 
+    public void loadEditor(@NotNull Class<?> clazz) {
+        for (Field field : Reflex.getFields(clazz)) {
+            if (!EditorLocale.class.isAssignableFrom(field.getType())) {
+                continue;
+            }
+
+            EditorLocale locale;
+            try {
+                locale = (EditorLocale) field.get(this);
+            } catch (IllegalArgumentException | IllegalAccessException e) {
+                e.printStackTrace();
+                continue;
+            }
+
+            // Do not load/set messages of super class(es) or if they are already present in the lang file.
+            if (!field.getDeclaringClass().equals(clazz)) {
+                continue;
+            }
+
+            this.read(locale);
+        }
+        this.getConfig().saveChanges();
+    }
+
     private boolean write(@NotNull LangKey key) {
         if (!this.getConfig().contains(key.getPath())) {
             String textDefault = key.getDefaultText();
@@ -161,6 +186,15 @@ public class LangManager<P extends NexPlugin<P>> extends AbstractManager<P> {
             return true;
         }
         return false;
+    }
+
+    private void read(@NotNull EditorLocale locale) {
+        if (!this.getConfig().contains(locale.getKey())) {
+            this.getConfig().set(locale.getKey() + ".Name", locale.getName());
+            this.getConfig().set(locale.getKey() + ".Lore", locale.getLore());
+        }
+        locale.setLocalizedName(this.getConfig().getString(locale.getKey() + ".Name", locale.getName()));
+        locale.setLocalizedLore(this.getConfig().getStringList(locale.getKey() + ".Lore"));
     }
 
     public void setupEnum(@NotNull Class<? extends Enum<?>> clazz) {
@@ -185,6 +219,7 @@ public class LangManager<P extends NexPlugin<P>> extends AbstractManager<P> {
         return locEnum == null ? "null" : locEnum;
     }
 
+    @Deprecated
     public void setupEditorEnum(@NotNull Class<? extends Enum<? extends EditorButtonType>> clazz) {
         if (!clazz.isEnum()) return;
         for (Object eName : clazz.getEnumConstants()) {
