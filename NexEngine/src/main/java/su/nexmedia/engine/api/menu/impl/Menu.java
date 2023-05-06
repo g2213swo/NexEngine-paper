@@ -96,6 +96,7 @@ public abstract class Menu<P extends NexPlugin<P>> implements ICleanable {
 
             ItemStack item = menuItem.getItem();
             menuItem.getOptions().modifyDisplay(viewer, item);
+            ItemUtil.removeItalic(item); // Akiranya - remove italic style enforced by Minecraft client
 
             for (int slot : menuItem.getSlots()) {
                 if (slot < 0 || slot >= inventory.getSize()) continue;
