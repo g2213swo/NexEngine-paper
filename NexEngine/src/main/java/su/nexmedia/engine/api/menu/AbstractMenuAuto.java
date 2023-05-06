@@ -25,19 +25,15 @@ public abstract class AbstractMenuAuto<P extends NexPlugin<P>, I> extends Abstra
 
     protected abstract int[] getObjectSlots();
 
-    @NotNull
-    protected abstract List<I> getObjects(@NotNull Player player);
+    protected abstract @NotNull List<I> getObjects(@NotNull Player player);
 
-    @NotNull
-    protected List<I> fineObjects(@NotNull List<I> objects, @NotNull Player player) {
+    protected @NotNull List<I> fineObjects(@NotNull List<I> objects, @NotNull Player player) {
         return objects;
     }
 
-    @NotNull
-    protected abstract ItemStack getObjectStack(@NotNull Player player, @NotNull I object);
+    protected abstract @NotNull ItemStack getObjectStack(@NotNull Player player, @NotNull I object);
 
-    @NotNull
-    protected abstract MenuClick getObjectClick(@NotNull Player player, @NotNull I object);
+    protected abstract @NotNull MenuClick getObjectClick(@NotNull Player player, @NotNull I object);
 
     @Override
     public boolean onPrepare(@NotNull Player player, @NotNull Inventory inventory) {

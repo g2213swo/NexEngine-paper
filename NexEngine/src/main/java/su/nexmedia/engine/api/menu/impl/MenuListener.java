@@ -65,7 +65,9 @@ public class MenuListener extends AbstractListener<NexEngine> {
         Menu.SlotType slotType;
         if (isPlayerSlot) {
             slotType = isEmptyItem ? Menu.SlotType.PLAYER_EMPTY : Menu.SlotType.PLAYER;
-        } else slotType = isEmptyItem ? Menu.SlotType.MENU_EMPTY : Menu.SlotType.MENU;
+        } else {
+            slotType = isEmptyItem ? Menu.SlotType.MENU_EMPTY : Menu.SlotType.MENU;
+        }
 
         menu.onClick(viewer, item, slotType, slot, e);
         FAST_CLICK.put(player.getUniqueId(), System.currentTimeMillis());

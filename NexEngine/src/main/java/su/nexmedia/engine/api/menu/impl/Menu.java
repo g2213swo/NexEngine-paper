@@ -17,6 +17,7 @@ import su.nexmedia.engine.api.menu.click.ItemClick;
 import su.nexmedia.engine.api.menu.item.ItemOptions;
 import su.nexmedia.engine.api.menu.item.MenuItem;
 import su.nexmedia.engine.utils.ArrayUtil;
+import su.nexmedia.engine.utils.ItemUtil;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -58,8 +59,7 @@ public abstract class Menu<P extends NexPlugin<P>> implements ICleanable {
         PLAYER_EMPTY, MENU_EMPTY, PLAYER, MENU
     }
 
-    @Nullable
-    public static Menu<?> getMenu(@NotNull Player player) {
+    public static @Nullable Menu<?> getMenu(@NotNull Player player) {
         return PLAYER_MENUS.get(player.getUniqueId());
     }
 
@@ -129,11 +129,13 @@ public abstract class Menu<P extends NexPlugin<P>> implements ICleanable {
 
     }
 
-    public void onClick(@NotNull MenuViewer viewer,
+    public void onClick(
+        @NotNull MenuViewer viewer,
         @Nullable ItemStack item,
         @NotNull SlotType slotType,
         int slot,
-        @NotNull InventoryClickEvent event) {
+        @NotNull InventoryClickEvent event
+    ) {
         event.setCancelled(true);
 
         if (item == null || item.getType().isAir()) return;
@@ -165,78 +167,65 @@ public abstract class Menu<P extends NexPlugin<P>> implements ICleanable {
         return true;
     }
 
-    @NotNull
-    public Collection<MenuViewer> getViewers() {
+    public @NotNull Collection<MenuViewer> getViewers() {
         return this.getViewersMap().values();
     }
 
-    @Nullable
-    public MenuViewer getViewer(@NotNull Player player) {
+    public @Nullable MenuViewer getViewer(@NotNull Player player) {
         return this.getViewersMap().get(player.getUniqueId());
     }
 
 
-    @NotNull
-    public Set<MenuItem> getItems(@NotNull Enum<?> type) {
+    public @NotNull Set<MenuItem> getItems(@NotNull Enum<?> type) {
         return this.getItems().stream().filter(menuItem -> menuItem.getType() == type).collect(Collectors.toSet());
     }
 
-    @NotNull
-    public List<MenuItem> getItems(@NotNull MenuViewer viewer) {
+    public @NotNull List<MenuItem> getItems(@NotNull MenuViewer viewer) {
         return this.getItems().stream()
             .filter(menuItem -> menuItem.getOptions().canSee(viewer))
             .sorted(Comparator.comparingInt(MenuItem::getPriority)).toList();
     }
 
-    @Nullable
-    public MenuItem getItem(int slot) {
+    public @Nullable MenuItem getItem(int slot) {
         return this.getItems().stream()
             .filter(item -> ArrayUtil.contains(item.getSlots(), slot))
             .max(Comparator.comparingInt(MenuItem::getPriority)).orElse(null);
     }
 
-    @Nullable
-    public MenuItem getItem(@NotNull MenuViewer viewer, int slot) {
+    public @Nullable MenuItem getItem(@NotNull MenuViewer viewer, int slot) {
         return this.getItems().stream()
             .filter(menuItem -> ArrayUtil.contains(menuItem.getSlots(), slot) && menuItem.getOptions().canSee(viewer))
             .max(Comparator.comparingInt(MenuItem::getPriority)).orElse(this.getItem(slot));
     }
 
-    @NotNull
-    public MenuItem addItem(@NotNull ItemStack item, int... slots) {
+    public @NotNull MenuItem addItem(@NotNull ItemStack item, int... slots) {
         return this.addItem(new MenuItem(item, slots));
     }
 
-    @NotNull
-    public MenuItem addWeakItem(@NotNull Player player, @NotNull ItemStack item, int... slots) {
+    public @NotNull MenuItem addWeakItem(@NotNull Player player, @NotNull ItemStack item, int... slots) {
         MenuItem menuItem = new MenuItem(item, slots);
         menuItem.setOptions(ItemOptions.personalWeak(player));
         return this.addItem(menuItem);
     }
 
-    @NotNull
-    public MenuItem addItem(@NotNull MenuItem menuItem) {
+    public @NotNull MenuItem addItem(@NotNull MenuItem menuItem) {
         this.getItems().add(menuItem);
         return menuItem;
     }
 
-    @NotNull
-    public UUID getId() {
-        return id;
+    public @NotNull UUID getId() {
+        return this.id;
     }
 
-    @NotNull
-    public Map<UUID, MenuViewer> getViewersMap() {
-        return viewers;
+    public @NotNull Map<UUID, MenuViewer> getViewersMap() {
+        return this.viewers;
     }
 
-    @NotNull
-    public Set<MenuItem> getItems() {
-        return items;
+    public @NotNull Set<MenuItem> getItems() {
+        return this.items;
     }
 
-    @NotNull
-    public MenuOptions getOptions() {
-        return options;
+    public @NotNull MenuOptions getOptions() {
+        return this.options;
     }
 }

@@ -270,7 +270,7 @@ public class EditorManager extends AbstractManager<NexEngine> implements IListen
         e.setCancelled(true);
 
         String msg = e.getMessage();
-        this.plugin.getServer().getScheduler().runTask(plugin, () -> {
+        this.plugin.getServer().getScheduler().runTask(this.plugin, () -> {
             if (msg.equalsIgnoreCase(EXIT) || editorInput.handle(player, e)) {
                 endEdit(player);
             }
@@ -288,7 +288,7 @@ public class EditorManager extends AbstractManager<NexEngine> implements IListen
         e.setCancelled(true);
 
         String msg = e.getMessage();
-        this.plugin.getServer().getScheduler().runTask(plugin, () -> {
+        this.plugin.getServer().getScheduler().runTask(this.plugin, () -> {
             if (msg.equalsIgnoreCase(EXIT) || handler.handle(e)) {
                 endEdit(player);
             }
@@ -315,7 +315,7 @@ public class EditorManager extends AbstractManager<NexEngine> implements IListen
 
         AsyncPlayerChatEvent event = new AsyncPlayerChatEvent(true, player, text, new HashSet<>());
 
-        this.plugin.getServer().getScheduler().runTask(plugin, () -> {
+        this.plugin.getServer().getScheduler().runTask(this.plugin, () -> {
             if (text.equalsIgnoreCase(EXIT) || editorInput.handle(player, event)) {
                 endEdit(player);
             }
@@ -342,7 +342,7 @@ public class EditorManager extends AbstractManager<NexEngine> implements IListen
 
         AsyncPlayerChatEvent event = new AsyncPlayerChatEvent(true, player, text, new HashSet<>());
 
-        this.plugin.getServer().getScheduler().runTask(plugin, () -> {
+        this.plugin.getServer().getScheduler().runTask(this.plugin, () -> {
             if (text.equalsIgnoreCase(EXIT) || handler.handle(event)) {
                 endEdit(player);
             }

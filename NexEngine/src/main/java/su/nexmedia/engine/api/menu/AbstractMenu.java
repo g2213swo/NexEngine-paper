@@ -81,8 +81,7 @@ public abstract class AbstractMenu<P extends NexPlugin<P>> extends AbstractListe
         EMPTY_PLAYER, EMPTY_MENU, PLAYER, MENU
     }
 
-    @Nullable
-    public static AbstractMenu<?> getMenu(@NotNull Player player) {
+    public static @Nullable AbstractMenu<?> getMenu(@NotNull Player player) {
         return PLAYER_MENUS.get(player);
     }
 
@@ -225,8 +224,7 @@ public abstract class AbstractMenu<P extends NexPlugin<P>> extends AbstractListe
         return this.getViewersMap().containsKey(player);
     }
 
-    @NotNull
-    public Inventory createInventory(@NotNull Player player) {
+    public @NotNull Inventory createInventory(@NotNull Player player) {
         Component title = this.getTitle(player);
         if (this.getInventoryType() == InventoryType.CHEST) {
             return this.plugin.getServer().createInventory(null, this.getSize(), title);
@@ -235,20 +233,17 @@ public abstract class AbstractMenu<P extends NexPlugin<P>> extends AbstractListe
         }
     }
 
-    @Nullable
-    public MenuItem getItem(@NotNull String id) {
+    public @Nullable MenuItem getItem(@NotNull String id) {
         return this.getItemsMap().get(id.toLowerCase());
     }
 
-    @Nullable
-    public MenuItem getItem(int slot) {
+    public @Nullable MenuItem getItem(int slot) {
         return this.getItemsMap().values().stream()
             .filter(item -> ArrayUtil.contains(item.getSlots(), slot))
             .max(Comparator.comparingInt(MenuItem::getPriority)).orElse(null);
     }
 
-    @Nullable
-    public MenuItem getItem(@NotNull Player player, int slot) {
+    public @Nullable MenuItem getItem(@NotNull Player player, int slot) {
         return this.getItemsMap().values().stream()
             .filter(menuItem -> ArrayUtil.contains(menuItem.getSlots(), slot) && menuItem.isVisible(player))
             .max(Comparator.comparingInt(MenuItem::getPriority)).orElse(this.getItem(slot));
@@ -293,9 +288,8 @@ public abstract class AbstractMenu<P extends NexPlugin<P>> extends AbstractListe
         this.getViewersMap().put(player, Pair.of(Math.min(pageCurrent, pageMax), pageMax));
     }
 
-    @NotNull
-    public UUID getId() {
-        return id;
+    public @NotNull UUID getId() {
+        return this.id;
     }
 
     public @NotNull Component getTitle() {
@@ -315,35 +309,31 @@ public abstract class AbstractMenu<P extends NexPlugin<P>> extends AbstractListe
     }
 
     public int getSize() {
-        return size;
+        return this.size;
     }
 
     public void setSize(int size) {
         this.size = size;
     }
 
-    @NotNull
-    public InventoryType getInventoryType() {
-        return inventoryType;
+    public @NotNull InventoryType getInventoryType() {
+        return this.inventoryType;
     }
 
     public void setInventoryType(@NotNull InventoryType inventoryType) {
         this.inventoryType = inventoryType;
     }
 
-    @NotNull
-    public Map<String, MenuItem> getItemsMap() {
-        return items;
+    public @NotNull Map<String, MenuItem> getItemsMap() {
+        return this.items;
     }
 
-    @NotNull
-    public Set<Player> getViewers() {
+    public @NotNull Set<Player> getViewers() {
         return this.getViewersMap().keySet();
     }
 
-    @NotNull
-    public Map<Player, Pair<Integer, Integer>> getViewersMap() {
-        return viewersMap;
+    public @NotNull Map<Player, Pair<Integer, Integer>> getViewersMap() {
+        return this.viewersMap;
     }
 
     public boolean destroyWhenNoViewers() {

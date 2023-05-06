@@ -27,15 +27,13 @@ public class ItemOptions {
         this.setDisplayModifier(displayModifier);
     }
 
-    @NotNull
-    public static ItemOptions personalWeak(@NotNull Player player) {
+    public static @NotNull ItemOptions personalWeak(@NotNull Player player) {
         Predicate<MenuViewer> visibility = (viewer -> viewer.getPlayer().getUniqueId().equals(player.getUniqueId()));
         Predicate<MenuViewer> weak = (viewer -> viewer.getPlayer().getUniqueId().equals(player.getUniqueId()));
         return new ItemOptions(visibility, weak, null);
     }
 
-    @NotNull
-    public static ItemOptions personalPermanent(@NotNull Player player) {
+    public static @NotNull ItemOptions personalPermanent(@NotNull Player player) {
         Predicate<MenuViewer> visibility = (viewer -> viewer.getPlayer().getUniqueId().equals(player.getUniqueId()));
         return new ItemOptions(visibility, null, null);
     }
@@ -57,35 +55,29 @@ public class ItemOptions {
         }
     }
 
-    @Nullable
-    public Predicate<MenuViewer> getVisibilityPolicy() {
-        return visibilityPolicy;
+    public @Nullable Predicate<MenuViewer> getVisibilityPolicy() {
+        return this.visibilityPolicy;
     }
 
-    @NotNull
-    public ItemOptions setVisibilityPolicy(@Nullable Predicate<MenuViewer> visibilityPolicy) {
+    public @NotNull ItemOptions setVisibilityPolicy(@Nullable Predicate<MenuViewer> visibilityPolicy) {
         this.visibilityPolicy = visibilityPolicy;
         return this;
     }
 
-    @Nullable
-    public Predicate<MenuViewer> getWeakPolicy() {
-        return weakPolicy;
+    public @Nullable Predicate<MenuViewer> getWeakPolicy() {
+        return this.weakPolicy;
     }
 
-    @NotNull
-    public ItemOptions setWeakPolicy(@Nullable Predicate<MenuViewer> weakPolicy) {
+    public @NotNull ItemOptions setWeakPolicy(@Nullable Predicate<MenuViewer> weakPolicy) {
         this.weakPolicy = weakPolicy;
         return this;
     }
 
-    @Nullable
-    public BiConsumer<MenuViewer, ItemStack> getDisplayModifier() {
-        return displayModifier;
+    public @Nullable BiConsumer<MenuViewer, ItemStack> getDisplayModifier() {
+        return this.displayModifier;
     }
 
-    @NotNull
-    public ItemOptions setDisplayModifier(@Nullable BiConsumer<MenuViewer, ItemStack> displayModifier) {
+    public @NotNull ItemOptions setDisplayModifier(@Nullable BiConsumer<MenuViewer, ItemStack> displayModifier) {
         this.displayModifier = displayModifier;
         return this;
     }

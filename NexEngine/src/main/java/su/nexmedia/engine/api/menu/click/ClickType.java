@@ -18,8 +18,7 @@ public enum ClickType {
     NUMBER_9,
     ;
 
-    @NotNull
-    public static ClickType from(@NotNull InventoryClickEvent e) {
+    public static @NotNull ClickType from(@NotNull InventoryClickEvent e) {
         if (e.getClick() == org.bukkit.event.inventory.ClickType.DROP) return DROP_KEY;
         if (e.getClick() == org.bukkit.event.inventory.ClickType.SWAP_OFFHAND) return SWAP_KEY;
         if (e.getHotbarButton() >= 0) {

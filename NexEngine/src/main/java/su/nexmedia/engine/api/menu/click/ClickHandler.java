@@ -15,24 +15,20 @@ public class ClickHandler<E extends Enum<E>> {
         this.clicks = new HashMap<>();
     }
 
-    @NotNull
-    public static ItemClick forNextPage(@NotNull Menu<?> menu) {
-        return ((viewer, event) -> menu.open(viewer.getPlayer(), viewer.getPage() + 1));
+    public static @NotNull ItemClick forNextPage(@NotNull Menu<?> menu) {
+        return (viewer, event) -> menu.open(viewer.getPlayer(), viewer.getPage() + 1);
     }
 
-    @NotNull
-    public static ItemClick forPreviousPage(@NotNull Menu<?> menu) {
-        return ((viewer, event) -> menu.open(viewer.getPlayer(), viewer.getPage() - 1));
+    public static @NotNull ItemClick forPreviousPage(@NotNull Menu<?> menu) {
+        return (viewer, event) -> menu.open(viewer.getPlayer(), viewer.getPage() - 1);
     }
 
-    @NotNull
-    public ClickHandler<E> addClick(@NotNull E type, @NotNull ItemClick click) {
+    public @NotNull ClickHandler<E> addClick(@NotNull E type, @NotNull ItemClick click) {
         this.clicks.put(type, click);
         return this;
     }
 
-    @Nullable
-    public ItemClick getClick(@NotNull Enum<?> type) {
+    public @Nullable ItemClick getClick(@NotNull Enum<?> type) {
         return this.clicks.get(type);
     }
 }

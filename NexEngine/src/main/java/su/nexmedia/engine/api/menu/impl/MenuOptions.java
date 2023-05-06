@@ -22,8 +22,7 @@ public class MenuOptions {
         this(options.getTitle(), options.getSize(), options.getType());
     }
 
-    @NotNull
-    public Inventory createInventory() {
+    public @NotNull Inventory createInventory() {
         String title = this.getTitle();
         if (this.getType() == InventoryType.CHEST) {
             return Bukkit.getServer().createInventory(null, this.getSize(), ComponentUtil.asComponent(title));
@@ -32,9 +31,8 @@ public class MenuOptions {
         }
     }
 
-    @NotNull
-    public String getTitle() {
-        return title;
+    public @NotNull String getTitle() {
+        return this.title;
     }
 
     public void setTitle(@NotNull String title) {
@@ -42,7 +40,7 @@ public class MenuOptions {
     }
 
     public int getSize() {
-        return size;
+        return this.size;
     }
 
     public void setSize(int size) {
@@ -50,9 +48,8 @@ public class MenuOptions {
         this.size = size;
     }
 
-    @NotNull
-    public InventoryType getType() {
-        return type;
+    public @NotNull InventoryType getType() {
+        return this.type;
     }
 
     public void setType(@NotNull InventoryType type) {

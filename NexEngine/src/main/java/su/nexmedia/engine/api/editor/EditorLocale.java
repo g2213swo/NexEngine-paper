@@ -20,38 +20,32 @@ public class EditorLocale {
         this.lore = lore;
     }
 
-    @NotNull
-    public static EditorLocale of(@NotNull String key, @NotNull String name, @NotNull String... lore) {
+    public static @NotNull EditorLocale of(@NotNull String key, @NotNull String name, @NotNull String... lore) {
         return new EditorLocale(key, name, Arrays.asList(lore));
     }
 
-    @NotNull
-    public String getKey() {
-        return key;
+    public @NotNull String getKey() {
+        return this.key;
     }
 
-    @NotNull
-    public String getName() {
-        return name;
+    public @NotNull String getName() {
+        return this.name;
     }
 
-    @NotNull
-    public List<String> getLore() {
-        return lore;
+    public @NotNull List<String> getLore() {
+        return this.lore;
     }
 
-    @NotNull
-    public String getLocalizedName() {
-        return localizedName;
+    public @NotNull String getLocalizedName() {
+        return this.localizedName;
     }
 
     public void setLocalizedName(@NotNull String localizedName) {
         this.localizedName = localizedName;
     }
 
-    @NotNull
-    public List<String> getLocalizedLore() {
-        return localizedLore;
+    public @NotNull List<String> getLocalizedLore() {
+        return this.localizedLore;
     }
 
     public void setLocalizedLore(@NotNull List<String> localizedLore) {

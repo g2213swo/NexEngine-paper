@@ -31,13 +31,13 @@ public abstract class ConfigMenu<P extends NexPlugin<P>> extends Menu<P> {
     }
 
     public void load() {
-        String title = JOption.create("Title", "", "Sets the GUI title.").read(cfg);
+        String title = JOption.create("Title", "", "Sets the GUI title.").read(this.cfg);
 
-        int size = JOption.create("Size", 27, "Sets the GUI size. Must be multiply of 9.").read(cfg);
+        int size = JOption.create("Size", 27, "Sets the GUI size. Must be multiply of 9.").read(this.cfg);
 
         InventoryType type = JOption.create("Inventory_Type", InventoryType.class, InventoryType.CHEST,
             "Sets the GUI type.",
-            "https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/inventory/InventoryType.html").read(cfg);
+            "https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/inventory/InventoryType.html").read(this.cfg);
 
         this.getOptions().setTitle(title);
         this.getOptions().setSize(size);
@@ -55,24 +55,21 @@ public abstract class ConfigMenu<P extends NexPlugin<P>> extends Menu<P> {
         this.handlers.clear();
     }
 
-    @NotNull
-    public <E extends Enum<E>> ClickHandler<E> registerHandler(@NotNull Class<E> clazz) {
+    public @NotNull <E extends Enum<E>> ClickHandler<E> registerHandler(@NotNull Class<E> clazz) {
         ClickHandler<E> handler = new ClickHandler<>();
         this.handlers.put(clazz, handler);
         return handler;
     }
 
-    @NotNull
-    public Set<Class<? extends Enum<?>>> getHandlerTypes() {
+    public @NotNull Set<Class<? extends Enum<?>>> getHandlerTypes() {
         return this.handlers.keySet();
     }
 
-    @NotNull
-    protected MenuItem readItem(@NotNull String path) {
+    protected @NotNull MenuItem readItem(@NotNull String path) {
         Enum<?> type = MenuItemType.NONE;
         ItemClick clickOrigin = null;
 
-        String typeRaw = cfg.getString(path + ".Type", "");
+        String typeRaw = this.cfg.getString(path + ".Type", "");
         Label_Search:
         for (Class<? extends Enum<?>> clazz : this.getHandlerTypes()) {
             for (Enum<?> eType : clazz.getEnumConstants()) {
@@ -87,18 +84,18 @@ public abstract class ConfigMenu<P extends NexPlugin<P>> extends Menu<P> {
             }
         }
 
-        ItemStack item = cfg.getItem(path + ".Item");
-        int[] slots = cfg.getIntArray(path + ".Slots");
-        int priority = cfg.getInt(path + ".Priority");
+        ItemStack item = this.cfg.getItem(path + ".Item");
+        int[] slots = this.cfg.getIntArray(path + ".Slots");
+        int priority = this.cfg.getInt(path + ".Priority");
 
         ItemClick clickCommands = null;
         Map<ClickType, List<String>> commandMap = new HashMap<>();
 
-        for (String sType : cfg.getSection(path + ".Click_Actions")) {
+        for (String sType : this.cfg.getSection(path + ".Click_Actions")) {
             ClickType clickType = StringUtil.getEnum(sType, ClickType.class).orElse(null);
             if (clickType == null) continue;
 
-            List<String> commands = cfg.getStringList(path + ".Click_Actions." + sType);
+            List<String> commands = this.cfg.getStringList(path + ".Click_Actions." + sType);
             commandMap.put(clickType, commands);
         }
 

@@ -53,8 +53,7 @@ public class MenuItem {
         this.setOptions(options);
     }
 
-    @NotNull
-    public MenuItem copy() {
+    public @NotNull MenuItem copy() {
         return new MenuItem(this.getType(), this.getItem(), this.getPriority(), this.getOptions(), this.getSlots());
     }
 
@@ -62,17 +61,15 @@ public class MenuItem {
         this.setOptions(new ItemOptions());
     }
 
-    @NotNull
-    public Enum<?> getType() {
-        return type;
+    public @NotNull Enum<?> getType() {
+        return this.type;
     }
 
     public void setType(@Nullable Enum<?> type) {
         this.type = type == null ? MenuItemType.NONE : type;
     }
 
-    @NotNull
-    public ItemStack getItem() {
+    public @NotNull ItemStack getItem() {
         return this.item.clone();
     }
 
@@ -81,7 +78,7 @@ public class MenuItem {
     }
 
     public int getPriority() {
-        return priority;
+        return this.priority;
     }
 
     public void setPriority(int priority) {
@@ -89,29 +86,26 @@ public class MenuItem {
     }
 
     public int[] getSlots() {
-        return slots;
+        return this.slots;
     }
 
     public void setSlots(int... slots) {
         this.slots = slots;
     }
 
-    @NotNull
-    public ItemOptions getOptions() {
-        return options;
+    public @NotNull ItemOptions getOptions() {
+        return this.options;
     }
 
     public void setOptions(@NotNull ItemOptions options) {
         this.options = options;
     }
 
-    @Nullable
-    public ItemClick getClick() {
-        return click;
+    public @Nullable ItemClick getClick() {
+        return this.click;
     }
 
-    @NotNull
-    public MenuItem setClick(@Nullable ItemClick click) {
+    public @NotNull MenuItem setClick(@Nullable ItemClick click) {
         this.click = click;
         return this;
     }

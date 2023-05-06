@@ -26,15 +26,7 @@ public class ItemUtil {
 
     private static final NexEngine ENGINE = NexEngine.get();
 
-    public static int addToLore(@NotNull List<String> lore, int pos, @NotNull String value) {
-        if (pos >= lore.size() || pos < 0) {
-            lore.add(value);
-        } else {
-            lore.add(pos, value);
-        }
-        return pos < 0 ? pos : pos + 1;
-    }
-
+    //<editor-fold desc="Methods which smartly get/set name and lore">
     public static @NotNull Component getName(@NotNull ItemStack item) {
         ItemMeta meta = item.getItemMeta();
         return meta != null && meta.hasDisplayName() ? Objects.requireNonNull(meta.displayName()) : Component.translatable(item.getType());
@@ -45,6 +37,17 @@ public class ItemUtil {
         return meta != null && meta.hasLore() ? Objects.requireNonNull(meta.lore()) : new ArrayList<>();
     }
 
+    public static int addToLore(@NotNull List<String> lore, int pos, @NotNull String value) {
+        if (pos >= lore.size() || pos < 0) {
+            lore.add(value);
+        } else {
+            lore.add(pos, value);
+        }
+        return pos < 0 ? pos : pos + 1;
+    }
+    //</editor-fold>
+
+    //<editor-fold desc="Methods which modify skulls">
     public static @NotNull ItemStack createCustomHead(@NotNull String texture) {
         ItemStack item = new ItemStack(Material.PLAYER_HEAD);
         setSkullTexture(item, texture);
@@ -78,13 +81,15 @@ public class ItemUtil {
         if (profile == null) return null;
 
         Collection<Property> properties = profile.getProperties().get("textures");
-        Optional<Property> opt = properties.stream().filter(prop -> {
-            return prop.getName().equalsIgnoreCase("textures") || prop.getSignature().equalsIgnoreCase("textures");
-        }).findFirst();
+        Optional<Property> opt = properties.stream().filter(prop ->
+            prop.getName().equalsIgnoreCase("textures") || prop.getSignature().equalsIgnoreCase("textures")
+        ).findFirst();
 
         return opt.map(Property::getValue).orElse(null);
     }
+    //</editor-fold>
 
+    //<editor-fold desc="Methods which modify ItemMeta">
     public static void setPlaceholderAPI(@NotNull ItemMeta meta, @NotNull Player player) {
         if (!Hooks.hasPlaceholderAPI()) return;
         if (meta.hasDisplayName()) {
@@ -193,7 +198,55 @@ public class ItemUtil {
         if (meta.hasLore())
             meta.lore(ComponentUtil.removeItalic(meta.lore()));
     }
+    //</editor-fold>
 
+    //<editor-fold desc="Methods which modify ItemStack">
+    public static void setPlaceholderAPI(@NotNull ItemStack item, @NotNull Player player) {
+        item.editMeta(meta -> setPlaceholderAPI(meta, player));
+    }
+
+    @SafeVarargs
+    public static boolean replaceNameAndLore(@Nullable ItemStack item, @NotNull UnaryOperator<String>... replacer) {
+        if (item == null || replacer.length == 0) return false;
+        return item.editMeta(meta -> replaceNameAndLore(meta, replacer));
+    }
+
+    public static boolean replacePlaceholderListComponent(@Nullable ItemStack item, @NotNull String placeholder, @NotNull List<Component> replacer, boolean compressEmpty, boolean keep) {
+        if (item == null) return false;
+        return item.editMeta(meta -> replacePlaceholderListComponent(meta, placeholder, replacer, compressEmpty, keep));
+    }
+
+    public static boolean replacePlaceholderListComponent(@Nullable ItemStack item, @NotNull String placeholder, @NotNull List<Component> replacer, boolean compressEmpty) {
+        if (item == null) return false;
+        return item.editMeta(meta -> replacePlaceholderListComponent(meta, placeholder, replacer, compressEmpty));
+    }
+
+    public static boolean replacePlaceholderListComponent(@Nullable ItemStack item, @NotNull String placeholder, @NotNull List<Component> replacer) {
+        if (item == null) return false;
+        return item.editMeta(meta -> replacePlaceholderListComponent(meta, placeholder, replacer));
+    }
+
+    public static boolean replacePlaceholderListString(@Nullable ItemStack item, @NotNull String placeholder, @NotNull List<String> replacer, boolean compressEmpty, boolean keep) {
+        if (item == null) return false;
+        return item.editMeta(meta -> replacePlaceholderListString(meta, placeholder, replacer, compressEmpty, keep));
+    }
+
+    public static boolean replacePlaceholderListString(@Nullable ItemStack item, @NotNull String placeholder, @NotNull List<String> replacer, boolean compressEmpty) {
+        if (item == null) return false;
+        return item.editMeta(meta -> replacePlaceholderListString(meta, placeholder, replacer, compressEmpty));
+    }
+
+    public static boolean replacePlaceholderListString(@Nullable ItemStack item, @NotNull String placeholder, @NotNull List<String> replacer) {
+        if (item == null) return false;
+        return item.editMeta(meta -> replacePlaceholderListString(meta, placeholder, replacer));
+    }
+
+    public static void removeItalic(ItemStack item) {
+        item.editMeta(ItemUtil::removeItalic);
+    }
+    //</editor-fold>
+
+    //<editor-fold desc="Methods which identify weapon types">
     @Deprecated
     public static boolean isWeapon(@NotNull ItemStack item) {
         return isSword(item) || isAxe(item) || isTrident(item);
@@ -298,7 +351,9 @@ public class ItemUtil {
         Material material = item.getType();
         return material.isItem() ? material.getEquipmentSlot() : EquipmentSlot.HAND;
     }
+    //</editor-fold>
 
+    //<editor-fold desc="Methods relating to serialization">
     public static @NotNull String getNBTTag(@NotNull ItemStack item) {
         return ENGINE.getNMS().getNBTTag(item);
     }
@@ -323,4 +378,5 @@ public class ItemUtil {
         List<ItemStack> items = list.stream().map(ItemUtil::fromBase64).filter(Objects::nonNull).toList();
         return items.toArray(new ItemStack[list.size()]);
     }
+    //</editor-fold>
 }

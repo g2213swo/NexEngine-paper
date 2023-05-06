@@ -9,7 +9,8 @@ import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("UnstableApiUsage")
 public class NexEngineLoader implements PluginLoader {
-    @Override public void classloader(@NotNull final PluginClasspathBuilder builder) {
+    @Override
+    public void classloader(final @NotNull PluginClasspathBuilder builder) {
         MavenLibraryResolver resolver = new MavenLibraryResolver();
         resolver.addDependency(new Dependency(new DefaultArtifact("com.zaxxer:HikariCP:5.0.1"), null));
         resolver.addDependency(new Dependency(new DefaultArtifact("it.unimi.dsi:fastutil:8.5.11"), null));

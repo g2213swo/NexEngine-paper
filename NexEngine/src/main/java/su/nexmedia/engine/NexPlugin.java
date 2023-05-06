@@ -37,8 +37,7 @@ public abstract class NexPlugin<P extends NexPlugin<P>> extends JavaPlugin imple
     private Logger logger;
     private boolean isEngine;
 
-    @NotNull
-    public static NexEngine getEngine() {
+    public static @NotNull NexEngine getEngine() {
         return NexEngine.get();
     }
 
@@ -46,12 +45,10 @@ public abstract class NexPlugin<P extends NexPlugin<P>> extends JavaPlugin imple
         return this.isEngine;
     }
 
-    @NotNull
-    protected abstract P getSelf();
+    protected abstract @NotNull P getSelf();
 
-    @NotNull
     @Override
-    public File getFile() {
+    public @NotNull File getFile() {
         return super.getFile();
     }
 
@@ -148,14 +145,11 @@ public abstract class NexPlugin<P extends NexPlugin<P>> extends JavaPlugin imple
         }
     }
 
-    @Override
-    @NotNull
-    public final JYML getConfig() {
+    @Override public final @NotNull JYML getConfig() {
         return this.getConfigManager().getConfig();
     }
 
-    @NotNull
-    public final JYML getLang() {
+    public final @NotNull JYML getLang() {
         return this.getLangManager().getConfig();
     }
 
@@ -245,13 +239,11 @@ public abstract class NexPlugin<P extends NexPlugin<P>> extends JavaPlugin imple
         this.getLangManager().shutdown();
     }
 
-    @NotNull
-    public final String getLabel() {
+    public final @NotNull String getLabel() {
         return this.getLabels()[0];
     }
 
-    @NotNull
-    public final String[] getLabels() {
+    public final @NotNull String[] getLabels() {
         return this.getConfigManager().commandAliases;
     }
 
@@ -259,33 +251,27 @@ public abstract class NexPlugin<P extends NexPlugin<P>> extends JavaPlugin imple
         return this.getCommandManager().getMainCommand();
     }
 
-    @NotNull
-    public final ConfigManager<P> getConfigManager() {
+    public final @NotNull ConfigManager<P> getConfigManager() {
         return this.configManager;
     }
 
-    @NotNull
-    public final LangManager<P> getLangManager() {
+    public final @NotNull LangManager<P> getLangManager() {
         return this.langManager;
     }
 
-    @NotNull
-    public final LangMessage getMessage(@NotNull LangKey key) {
+    public final @NotNull LangMessage getMessage(@NotNull LangKey key) {
         return this.getLangManager().getMessage(key);
     }
 
-    @NotNull
-    public final CommandManager<P> getCommandManager() {
+    public final @NotNull CommandManager<P> getCommandManager() {
         return this.commandManager;
     }
 
-    @NotNull
-    public final BukkitScheduler getScheduler() {
+    public final @NotNull BukkitScheduler getScheduler() {
         return this.getServer().getScheduler();
     }
 
-    @NotNull
-    public final PluginManager getPluginManager() {
+    public final @NotNull PluginManager getPluginManager() {
         return this.getServer().getPluginManager();
     }
 

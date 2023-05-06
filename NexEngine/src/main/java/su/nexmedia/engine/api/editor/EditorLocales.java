@@ -19,8 +19,7 @@ public class EditorLocales {
     public static final EditorLocale NEXT_PAGE = EditorLocale.of("Editor.Generic.NextPage", "<#e3fbf9>(→) <b>Next Page");
     public static final EditorLocale PREVIOUS_PAGE = EditorLocale.of("Editor.Generic.PreviousPage", "<#e3fbf9>(←) <b>Previous Page");
 
-    @NotNull
-    protected static Builder builder(@NotNull String key) {
+    protected static @NotNull Builder builder(@NotNull String key) {
         return new Builder(key);
     }
 
@@ -36,69 +35,56 @@ public class EditorLocales {
             this.lore = new ArrayList<>();
         }
 
-        @NotNull
-        public EditorLocale build() {
+        public @NotNull EditorLocale build() {
             return new EditorLocale(this.key, this.name, this.lore);
         }
 
-        @NotNull
-        public Builder name(@NotNull String name) {
+        public @NotNull Builder name(@NotNull String name) {
             this.name = YELLOW + "<b>" + name;
             return this;
         }
 
-        @NotNull
-        public Builder text(@NotNull String... text) {
+        public @NotNull Builder text(@NotNull String... text) {
             return this.addLore(GRAY, text);
         }
 
-        @NotNull
-        public Builder currentHeader() {
+        public @NotNull Builder currentHeader() {
             return this.addLore(YELLOW + "<b>", "Current:");
         }
 
-        @NotNull
-        public Builder current(@NotNull String type, @NotNull String value) {
+        public @NotNull Builder current(@NotNull String type, @NotNull String value) {
             return this.addLore(YELLOW + "▪ " + GRAY, type + ": " + YELLOW + value);
         }
 
-        @NotNull
-        public Builder warningHeader() {
+        public @NotNull Builder warningHeader() {
             return this.addLore(RED + "<b>", "Warning:");
         }
 
-        @NotNull
-        public Builder warning(@NotNull String... info) {
+        public @NotNull Builder warning(@NotNull String... info) {
             return this.addLore(RED + "▪ " + GRAY, info);
         }
 
-        @NotNull
-        public Builder noteHeader() {
+        public @NotNull Builder noteHeader() {
             return this.addLore(ORANGE + "<b>", "Notes:");
         }
 
-        @NotNull
-        public Builder notes(@NotNull String... info) {
+        public @NotNull Builder notes(@NotNull String... info) {
             return this.addLore(ORANGE + "▪ " + GRAY, info);
         }
 
-        @NotNull
-        public Builder actionsHeader() {
+        public @NotNull Builder actionsHeader() {
             return this.addLore(GREEN + "<b>", "Actions:");
         }
 
-        @NotNull
-        public Builder action(@NotNull String click, @NotNull String action) {
+        public @NotNull Builder action(@NotNull String click, @NotNull String action) {
             return this.addLore(GREEN + "▪ " + GRAY, click + ": " + GREEN + action);
         }
 
-        @NotNull
-        public Builder breakLine() {
+        public @NotNull Builder breakLine() {
             return this.addLore("", "");
         }
 
-        @NotNull
-        private Builder addLore(@NotNull String prefix, @NotNull String... text) {
+        private @NotNull Builder addLore(@NotNull String prefix, @NotNull String... text) {
             for (String str : text) {
                 this.lore.add(prefix + str);
             }

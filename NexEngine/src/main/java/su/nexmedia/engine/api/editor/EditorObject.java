@@ -17,19 +17,16 @@ public class EditorObject<T, E extends Enum<E>> {
         this.input = input;
     }
 
-    @NotNull
-    public E getType() {
-        return type;
+    public @NotNull E getType() {
+        return this.type;
     }
 
-    @NotNull
-    public T getObject() {
-        return object;
+    public @NotNull T getObject() {
+        return this.object;
     }
 
-    @NotNull
-    public EditorInput<T, E> getInput() {
-        return input;
+    public @NotNull EditorInput<T, E> getInput() {
+        return this.input;
     }
 
     public boolean handle(@NotNull Player player, @NotNull AsyncPlayerChatEvent e) {

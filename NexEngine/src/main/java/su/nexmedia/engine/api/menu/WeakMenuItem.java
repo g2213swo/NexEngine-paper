@@ -18,9 +18,8 @@ public class WeakMenuItem extends MenuItem {
         this.setWeakPolicy(e -> e.getUniqueId().equals(holder.getUniqueId()));
     }
 
-    @NotNull
-    public Predicate<Player> getWeakPolicy() {
-        return weakPolicy;
+    public @NotNull Predicate<Player> getWeakPolicy() {
+        return this.weakPolicy;
     }
 
     public void setWeakPolicy(@NotNull Predicate<Player> weakPolicy) {

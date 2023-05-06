@@ -16,13 +16,12 @@ public class MenuViewer {
         this.setPages(1);
     }
 
-    @NotNull
-    public Player getPlayer() {
-        return player;
+    public @NotNull Player getPlayer() {
+        return this.player;
     }
 
     public int getPage() {
-        return page;
+        return this.page;
     }
 
     public void setPage(int page) {
@@ -34,7 +33,7 @@ public class MenuViewer {
     }
 
     public int getPages() {
-        return pages;
+        return this.pages;
     }
 
     public void setPages(int pages) {

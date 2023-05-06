@@ -64,14 +64,12 @@ public class MenuItem {
         this.clickCommands = clickCommands;
     }
 
-    @NotNull
-    public String getId() {
-        return id;
+    public @NotNull String getId() {
+        return this.id;
     }
 
-    @Nullable
-    public Enum<?> getType() {
-        return type;
+    public @Nullable Enum<?> getType() {
+        return this.type;
     }
 
     public void setType(@Nullable Enum<?> type) {
@@ -79,7 +77,7 @@ public class MenuItem {
     }
 
     public int[] getSlots() {
-        return slots;
+        return this.slots;
     }
 
     public void setSlots(int... slots) {
@@ -87,15 +85,14 @@ public class MenuItem {
     }
 
     public int getPriority() {
-        return priority;
+        return this.priority;
     }
 
     public void setPriority(int priority) {
         this.priority = priority;
     }
 
-    @NotNull
-    public ItemStack getItem() {
+    public @NotNull ItemStack getItem() {
         return new ItemStack(this.item);
     }
 
@@ -103,31 +100,27 @@ public class MenuItem {
         this.item = new ItemStack(item);
     }
 
-    @NotNull
-    public MenuItemVisibility getVisibility() {
-        return visibility;
+    public @NotNull MenuItemVisibility getVisibility() {
+        return this.visibility;
     }
 
     public void setVisibility(@NotNull MenuItemVisibility visibility) {
         this.visibility = visibility;
     }
 
-    @NotNull
-    public Map<UUID, MenuItemVisibility> getPersonalVisibility() {
-        return personalVisibility;
+    public @NotNull Map<UUID, MenuItemVisibility> getPersonalVisibility() {
+        return this.personalVisibility;
     }
 
-    @Nullable
-    public Predicate<Player> getVisibilityPolicy() {
-        return visibilityPolicy;
+    public @Nullable Predicate<Player> getVisibilityPolicy() {
+        return this.visibilityPolicy;
     }
 
     public void setVisibilityPolicy(@Nullable Predicate<Player> visibilityPolicy) {
         this.visibilityPolicy = visibilityPolicy;
     }
 
-    @NotNull
-    public MenuItemVisibility getPersonalVisibility(@NotNull Player player) {
+    public @NotNull MenuItemVisibility getPersonalVisibility(@NotNull Player player) {
         return this.getPersonalVisibility().getOrDefault(player.getUniqueId(), this.getVisibility());
     }
 
@@ -160,22 +153,19 @@ public class MenuItem {
         return false;
     }
 
-    @Nullable
-    public MenuClick getClickHandler() {
-        return clickHandler;
+    public @Nullable MenuClick getClickHandler() {
+        return this.clickHandler;
     }
 
     public void setClickHandler(@Nullable MenuClick clickHandler) {
         this.clickHandler = clickHandler;
     }
 
-    @NotNull
-    public Map<ClickType, List<String>> getClickCommands() {
-        return clickCommands;
+    public @NotNull Map<ClickType, List<String>> getClickCommands() {
+        return this.clickCommands;
     }
 
-    @NotNull
-    public List<String> getClickCommands(@NotNull ClickType clickType) {
+    public @NotNull List<String> getClickCommands(@NotNull ClickType clickType) {
         return this.getClickCommands().getOrDefault(clickType, Collections.emptyList());
     }
 }

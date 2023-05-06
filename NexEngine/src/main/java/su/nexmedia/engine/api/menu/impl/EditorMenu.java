@@ -26,8 +26,7 @@ public class EditorMenu<P extends NexPlugin<P>, T> extends Menu<P> {
         this.object = object;
     }
 
-    @NotNull
-    protected MenuItem addNextPage(int... slots) {
+    protected @NotNull MenuItem addNextPage(int... slots) {
         ItemStack item = new ItemStack(Material.PLAYER_HEAD);
         ItemUtil.setSkullTexture(item, "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjgyYWQxYjljYjRkZDIxMjU5YzBkNzVhYTMxNWZmMzg5YzNjZWY3NTJiZTM5NDkzMzgxNjRiYWM4NGE5NmUifX19");
         MenuItem menuItem = this.addItem(item, EditorLocales.NEXT_PAGE, slots);
@@ -36,8 +35,7 @@ public class EditorMenu<P extends NexPlugin<P>, T> extends Menu<P> {
         return menuItem;
     }
 
-    @NotNull
-    protected MenuItem addPreviousPage(int... slots) {
+    protected @NotNull MenuItem addPreviousPage(int... slots) {
         ItemStack item = new ItemStack(Material.PLAYER_HEAD);
         ItemUtil.setSkullTexture(item, "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzdhZWU5YTc1YmYwZGY3ODk3MTgzMDE1Y2NhMGIyYTdkNzU1YzYzMzg4ZmYwMTc1MmQ1ZjQ0MTlmYzY0NSJ9fX0=");
         MenuItem menuItem = this.addItem(item, EditorLocales.PREVIOUS_PAGE, slots);
@@ -46,22 +44,19 @@ public class EditorMenu<P extends NexPlugin<P>, T> extends Menu<P> {
         return menuItem;
     }
 
-    @NotNull
-    protected MenuItem addReturn(int... slots) {
+    protected @NotNull MenuItem addReturn(int... slots) {
         ItemStack item = new ItemStack(Material.PLAYER_HEAD);
         ItemUtil.setSkullTexture(item, "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTM4NTJiZjYxNmYzMWVkNjdjMzdkZTRiMGJhYTJjNWY4ZDhmY2E4MmU3MmRiY2FmY2JhNjY5NTZhODFjNCJ9fX0=");
         return this.addItem(item, EditorLocales.RETURN, slots);
     }
 
-    @NotNull
-    protected MenuItem addCreation(@NotNull EditorLocale locale, int... slots) {
+    protected @NotNull MenuItem addCreation(@NotNull EditorLocale locale, int... slots) {
         ItemStack item = new ItemStack(Material.PLAYER_HEAD);
         ItemUtil.setSkullTexture(item, "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWZmMzE0MzFkNjQ1ODdmZjZlZjk4YzA2NzU4MTA2ODFmOGMxM2JmOTZmNTFkOWNiMDdlZDc4NTJiMmZmZDEifX19");
         return this.addItem(item, locale, slots);
     }
 
-    @NotNull
-    protected MenuItem addExit(int... slots) {
+    protected @NotNull MenuItem addExit(int... slots) {
         ItemStack item = new ItemStack(Material.PLAYER_HEAD);
         ItemUtil.setSkullTexture(item, "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmViNTg4YjIxYTZmOThhZDFmZjRlMDg1YzU1MmRjYjA1MGVmYzljYWI0MjdmNDYwNDhmMThmYzgwMzQ3NWY3In19fQ==");
         MenuItem menuItem = this.addItem(item, EditorLocales.CLOSE, slots);
@@ -69,13 +64,11 @@ public class EditorMenu<P extends NexPlugin<P>, T> extends Menu<P> {
         return menuItem;
     }
 
-    @NotNull
-    public MenuItem addItem(@NotNull Material material, @NotNull EditorLocale locale, int... slots) {
+    public @NotNull MenuItem addItem(@NotNull Material material, @NotNull EditorLocale locale, int... slots) {
         return this.addItem(new ItemStack(material), locale, slots);
     }
 
-    @NotNull
-    public MenuItem addItem(@NotNull ItemStack item, @NotNull EditorLocale locale, int... slots) {
+    public @NotNull MenuItem addItem(@NotNull ItemStack item, @NotNull EditorLocale locale, int... slots) {
         item.editMeta(meta -> {
             meta.displayName(ComponentUtil.asComponent(locale.getLocalizedName()));
             meta.lore(ComponentUtil.asComponent(locale.getLocalizedLore()));
@@ -93,8 +86,7 @@ public class EditorMenu<P extends NexPlugin<P>, T> extends Menu<P> {
         this.plugin.runTask(task -> player.closeInventory());
     }
 
-    @NotNull
-    public T getObject() {
-        return object;
+    public @NotNull T getObject() {
+        return this.object;
     }
 }

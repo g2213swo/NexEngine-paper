@@ -24,8 +24,7 @@ public interface AutoPaged<I> {
 
     @NotNull Comparator<I> getObjectSorter();
 
-    @NotNull
-    default List<MenuItem> getItemsForPage(@NotNull MenuViewer viewer) {
+    default @NotNull List<MenuItem> getItemsForPage(@NotNull MenuViewer viewer) {
         Player player = viewer.getPlayer();
         List<MenuItem> items = new ArrayList<>();
         List<I> origin = this.getObjects(player);
