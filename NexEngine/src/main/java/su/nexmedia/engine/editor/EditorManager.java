@@ -158,7 +158,7 @@ public class EditorManager extends AbstractManager<NexEngine> implements IListen
         Component pageText = text()
             .color(NamedTextColor.YELLOW)
             .append(text(page))
-            .append(text("/").color(NamedTextColor.GOLD))
+            .append(text(" / ").color(NamedTextColor.GOLD))
             .append(text(pages))
             .asComponent();
         Component prevText = text(" [<] ").color(NamedTextColor.GRAY);
@@ -211,6 +211,7 @@ public class EditorManager extends AbstractManager<NexEngine> implements IListen
         player.sendMessage(header);
         player.sendMessage(Component.join(JoinConfiguration.newlines(), items));
         player.sendMessage(footer);
+        ENGINE.getMessage(EngineLang.EDITOR_TIP_EXIT).send(player);
     }
 
     @Deprecated
