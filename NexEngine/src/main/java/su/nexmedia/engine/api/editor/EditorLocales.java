@@ -8,11 +8,17 @@ import java.util.List;
 public class EditorLocales {
 
     protected static final String RED = "<#ff6a6a>";
+    protected static final String RED_CLOSE = "</#ff6a6a>";
     protected static final String GREEN = "<#bbff6a>";
+    protected static final String GREEN_CLOSE = "</#bbff6a>";
     protected static final String BLUE = "<#6adbff>";
+    protected static final String BLUE_CLOSE = "</#6adbff>";
     protected static final String ORANGE = "<#ffa76a>";
+    protected static final String ORANGE_CLOSE = "</#ffa76a>";
     protected static final String YELLOW = "<#ffed6a>";
+    protected static final String YELLOW_CLOSE = "</#ffed6a>";
     protected static final String GRAY = "<#bdc8c9>";
+    protected static final String GRAY_CLOSE = "</#bdc8c9>";
 
     public static final EditorLocale CLOSE = EditorLocale.of("Editor.Generic.Close", "<#ff5733>(✕) <b>Exit");
     public static final EditorLocale RETURN = EditorLocale.of("Editor.Generic.Return", "<#ffee9a>(↓) <white>Return");
@@ -53,7 +59,7 @@ public class EditorLocales {
         }
 
         public @NotNull Builder current(@NotNull String type, @NotNull String value) {
-            return this.addLore(YELLOW + "▪ " + GRAY, type + ": " + YELLOW + value);
+            return this.addLore(YELLOW + "▪ " + YELLOW_CLOSE, type + ": " + YELLOW + value);
         }
 
         public @NotNull Builder warningHeader() {
@@ -61,7 +67,7 @@ public class EditorLocales {
         }
 
         public @NotNull Builder warning(@NotNull String... info) {
-            return this.addLore(RED + "▪ " + GRAY, info);
+            return this.addLore(RED + "▪ " + RED_CLOSE, info);
         }
 
         public @NotNull Builder noteHeader() {
@@ -69,7 +75,7 @@ public class EditorLocales {
         }
 
         public @NotNull Builder notes(@NotNull String... info) {
-            return this.addLore(ORANGE + "▪ " + GRAY, info);
+            return this.addLore(ORANGE + "▪ " + ORANGE_CLOSE, info);
         }
 
         public @NotNull Builder actionsHeader() {
@@ -77,7 +83,7 @@ public class EditorLocales {
         }
 
         public @NotNull Builder action(@NotNull String click, @NotNull String action) {
-            return this.addLore(GREEN + "▪ " + GRAY, click + ": " + GREEN + action);
+            return this.addLore(GREEN + "▪ " + GREEN_CLOSE, click + ": " + GREEN + action);
         }
 
         public @NotNull Builder breakLine() {
