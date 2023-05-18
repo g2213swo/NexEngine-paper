@@ -466,10 +466,9 @@ public class JYML extends YamlConfiguration {
     }
 
     @Nullable
-    public ItemStack getPluginItem(@NotNull String path) {
+    public PluginItem<?> getPluginItem(@NotNull String path) {
         String reference = this.getString(path);
-        PluginItem<?> pluginItem = PluginItemRegistry.get().fromReferenceNullable(reference);
-        return pluginItem != null ? pluginItem.createItemStack() : null;
+        return PluginItemRegistry.get().fromReferenceNullable(reference);
     }
 
     public void setPluginItem(@NotNull String path, @NotNull ItemStack item) {
@@ -479,6 +478,10 @@ public class JYML extends YamlConfiguration {
             return;
         }
         this.set(path, pluginItem.asReference());
+    }
+
+    public void setPluginItem(@NotNull String path, @NotNull PluginItem<?> item) {
+        this.set(path, item.asReference());
     }
 
     @NotNull
