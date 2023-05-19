@@ -19,9 +19,11 @@ public class ItemOptions {
         this(null, null, null);
     }
 
-    public ItemOptions(@Nullable Predicate<MenuViewer> visibilityPolicy,
+    public ItemOptions(
+        @Nullable Predicate<MenuViewer> visibilityPolicy,
         @Nullable Predicate<MenuViewer> weakPolicy,
-        @Nullable BiConsumer<MenuViewer, ItemStack> displayModifier) {
+        @Nullable BiConsumer<MenuViewer, ItemStack> displayModifier
+    ) {
         this.setVisibilityPolicy(visibilityPolicy);
         this.setWeakPolicy(weakPolicy);
         this.setDisplayModifier(displayModifier);
@@ -82,12 +84,12 @@ public class ItemOptions {
         return this;
     }
 
-    public @NotNull ItemOptions applyDisplayModifier(@NotNull BiConsumer<MenuViewer, ItemStack> displayModifier) {
+    public @NotNull ItemOptions addDisplayModifier(@NotNull BiConsumer<MenuViewer, ItemStack> displayModifier) {
         if (this.displayModifier == null) {
             this.displayModifier = displayModifier;
-            return this;
+        } else {
+            this.displayModifier = this.displayModifier.andThen(displayModifier);
         }
-        this.displayModifier = this.displayModifier.andThen(displayModifier);
         return this;
     }
 }

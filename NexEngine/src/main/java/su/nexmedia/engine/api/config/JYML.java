@@ -55,6 +55,14 @@ public class JYML extends YamlConfiguration {
     }
 
     @NotNull
+    public static JYML loadOrExtract(@NotNull NexPlugin<?> plugin, @NotNull String path, @NotNull String file) {
+        if (!path.endsWith("/")) {
+            path += "/";
+        }
+        return loadOrExtract(plugin, path + file);
+    }
+
+    @NotNull
     public static JYML loadOrExtract(@NotNull NexPlugin<?> plugin, @NotNull String filePath) {
         if (!filePath.startsWith("/")) {
             filePath = "/" + filePath;
