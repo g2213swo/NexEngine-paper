@@ -24,7 +24,7 @@ dependencies {
         exclude("ch.ethz.globis.phtree")
     }
     compileOnly("org.geysermc.floodgate:api:2.2.0-SNAPSHOT")
-    compileOnly("io.lumine:Mythic-Dist:5.2.1") { isTransitive = false }
+    compileOnly("io.lumine:Mythic-Dist:5.2.6") { isTransitive = false }
 }
 
 description = "NexEngineExt"
