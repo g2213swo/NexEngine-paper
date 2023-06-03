@@ -12,7 +12,8 @@ include(":NexEngineExt")
 // include(":PlayerBlockTracker")
 
 include(":NMS")
-include(":NexEngineCompat_V1_17_R1")
 include(":NexEngineCompat_V1_18_R2")
 include(":NexEngineCompat_V1_19_R2")
 include(":NexEngineCompat_V1_19_R3")
+
+apply(from = "${System.getenv("HOME")}/MewcraftGradle/mirrors.settings.gradle.kts")
