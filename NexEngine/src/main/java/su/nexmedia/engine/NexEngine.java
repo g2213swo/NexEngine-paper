@@ -49,7 +49,6 @@ public class NexEngine extends NexPlugin<NexEngine> {
     private boolean setupNMS() {
         try {
             this.nms = switch (Version.CURRENT) {
-                case V1_17_R1 -> new V1_17_R1();
                 case V1_18_R2 -> new V1_18_R2();
                 case V1_19_R2 -> new V1_19_R2();
                 case V1_19_R3 -> new V1_19_R3();

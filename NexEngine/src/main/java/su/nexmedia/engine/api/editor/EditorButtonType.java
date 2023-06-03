@@ -23,9 +23,6 @@ public interface EditorButtonType {
     @NotNull
     Material getMaterial();
 
-    /**
-     * @inheritDoc
-     */
     @NotNull
     String name();
 
@@ -83,7 +80,8 @@ public interface EditorButtonType {
     }
 
     /**
-     * Transforms the text into multiple segments (of length <= 6 words) which are separated with a '\n' character.
+     * Transforms the text into multiple segments (of length less or equal to 6 words) which are separated with a '\n'
+     * character.
      * <p>
      * It is known that the '\n' character does not create a newline in the item lore. Instead, it will be displayed as
      * a "newline" character. You are supposed to manually split the text into multiple lines and insert them into the
