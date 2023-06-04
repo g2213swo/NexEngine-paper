@@ -10,20 +10,20 @@ description = "NexEngine"
 dependencies {
     api(project(":NexEngineAPI"))
 
-    // Server API
+    // server api
     compileOnly(libs.server.paper)
 
-    // NMS modules
+    // nms modules
     api(project(":NMS"))
     implementation(project(":NexEngineCompat_V1_18_R2", configuration = "reobf"))
-    implementation(project(":NexEngineCompat_V1_19_R2", configuration = "reobf"))
     implementation(project(":NexEngineCompat_V1_19_R3", configuration = "reobf"))
 
-    // Internal libraries
+    // libs to be shaded
     compileOnly("io.netty:netty-all:4.1.86.Final")
     compileOnly("org.xerial:sqlite-jdbc:3.40.0.0")
 
-    // 3rd party plugins
+    // code that requires 3rd plugin dependencies
+    // we put it in a separate module to avoid dependency pollution
     api(project(":NexEngineExt"))
 }
 

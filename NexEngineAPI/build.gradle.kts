@@ -8,6 +8,7 @@ description = "NexEngineAPI"
 
 dependencies {
     compileOnly(libs.server.paper)
+    compileOnlyApi(libs.mewcore)
 }
 
 indra {

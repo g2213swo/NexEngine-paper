@@ -10,9 +10,6 @@ dependencies {
 
     compileOnly(libs.server.paper)
 
-    // My own library
-    compileOnlyApi(libs.mewcore)
-
     // 3rd party plugins that may contain random transitive dependencies
     compileOnly(libs.papi)
     compileOnly(libs.vault) { isTransitive = false }
