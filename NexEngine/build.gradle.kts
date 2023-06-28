@@ -1,17 +1,23 @@
 plugins {
     id("su.nexmedia.project-conventions")
     id("cc.mewcraft.publishing-conventions")
-    alias(libs.plugins.shadow)
-    alias(libs.plugins.indra)
+    id("cc.mewcraft.deploy-conventions")
+    id("cc.mewcraft.paper-plugins")
 }
 
-description = "NexEngine"
+project.ext.set("name", "NexEngine")
 
 dependencies {
-    api(project(":NexEngineAPI"))
-
     // server api
     compileOnly(libs.server.paper)
+
+    // the "api" module
+    // make it a separate module to avoid circular dependencies
+    api(project(":NexEngineAPI"))
+
+    // code that requires 3rd plugin dependencies
+    // we put it in a separate module to avoid dependency pollution
+    api(project(":NexEngineExt"))
 
     // nms modules
     api(project(":NMS"))
@@ -21,10 +27,6 @@ dependencies {
     // libs to be shaded
     compileOnly("io.netty:netty-all:4.1.86.Final")
     compileOnly("org.xerial:sqlite-jdbc:3.40.0.0")
-
-    // code that requires 3rd plugin dependencies
-    // we put it in a separate module to avoid dependency pollution
-    api(project(":NexEngineExt"))
 }
 
 // TODO remove plugin.yml
@@ -38,43 +40,3 @@ dependencies {
     load = STARTUP
     libraries = listOf("com.zaxxer:HikariCP:5.0.1", "it.unimi.dsi:fastutil:8.5.11")
 }*/
-
-tasks {
-    build {
-        dependsOn(shadowJar)
-    }
-    jar {
-        archiveClassifier.set("noshade")
-    }
-    shadowJar {
-        minimize {
-            exclude(dependency("su.nexmedia:.*:.*"))
-        }
-        archiveFileName.set("NexEngine-${project.version}.jar")
-        archiveClassifier.set("")
-        destinationDirectory.set(file("$rootDir"))
-    }
-    processResources {
-        filesMatching("**/paper-plugin.yml") {
-            expand(mapOf(
-                "version" to "${project.version}",
-                "description" to project.description
-            ))
-        }
-    }
-    register("deployJar") {
-        doLast {
-            exec {
-                commandLine("rsync", shadowJar.get().archiveFile.get().asFile.absoluteFile, "dev:data/dev/jar")
-            }
-        }
-    }
-    register("deployJarFresh") {
-        dependsOn(build)
-        finalizedBy(named("deployJar"))
-    }
-}
-
-indra {
-    javaVersions().target(17)
-}

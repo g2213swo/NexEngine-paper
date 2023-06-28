@@ -1,9 +1,6 @@
 plugins {
     id("su.nexmedia.project-conventions")
-    id("cc.mewcraft.publishing-conventions")
 }
-
-description = "NexEngineExt"
 
 dependencies {
     compileOnly(project(":NexEngineAPI"))
