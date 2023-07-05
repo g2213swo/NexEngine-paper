@@ -22,7 +22,10 @@ public interface AutoPaged<I> {
 
     @NotNull ItemClick getObjectClick(@NotNull I object);
 
-    @NotNull Comparator<I> getObjectSorter();
+    @Deprecated
+    @NotNull default Comparator<I> getObjectSorter() {
+        return (o1, o2) -> 0;
+    }
 
     default @NotNull List<MenuItem> getItemsForPage(@NotNull MenuViewer viewer) {
         Player player = viewer.getPlayer();
@@ -36,7 +39,7 @@ public interface AutoPaged<I> {
 
         int skip = (viewer.getPage() - 1) * limit;
 
-        List<I> list = new ArrayList<>(origin.stream().skip(skip).limit(limit).sorted(this.getObjectSorter()).toList());
+        List<I> list = new ArrayList<>(origin.stream().skip(skip).limit(limit).toList());
         int count = 0;
         for (I object : list) {
             ItemStack item = this.getObjectStack(player, object);

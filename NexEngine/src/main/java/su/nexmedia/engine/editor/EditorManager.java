@@ -19,6 +19,8 @@ import su.nexmedia.engine.Version;
 import su.nexmedia.engine.api.editor.EditorHandler;
 import su.nexmedia.engine.api.editor.EditorInput;
 import su.nexmedia.engine.api.editor.EditorObject;
+import su.nexmedia.engine.api.editor.InputHandler;
+import su.nexmedia.engine.api.editor.InputWrapper;
 import su.nexmedia.engine.api.manager.AbstractManager;
 import su.nexmedia.engine.api.manager.IListener;
 import su.nexmedia.engine.api.menu.AbstractMenu;
@@ -30,7 +32,13 @@ import su.nexmedia.engine.utils.MessageUtil;
 import su.nexmedia.engine.utils.Pair;
 import su.nexmedia.engine.utils.StringUtil;
 
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 import static net.kyori.adventure.text.Component.text;
 
@@ -43,6 +51,7 @@ public class EditorManager extends AbstractManager<NexEngine> implements IListen
 
     private static final Map<Player, Pair<Menu<?>, Integer>> USER_CACHE_MENU = new WeakHashMap<>();
     private static final Map<Player, EditorHandler> USER_CACHE_INPUT = new WeakHashMap<>();
+    private static final Map<Player, InputHandler> USER_CACHE_INPUT_2 = new WeakHashMap<>();
     private static final Map<Player, List<String>> USER_CACHE_VALUES = new WeakHashMap<>();
 
     private static final String EXIT = "#exit";
@@ -77,6 +86,10 @@ public class EditorManager extends AbstractManager<NexEngine> implements IListen
         return USER_CACHE_INPUT.get(player);
     }
 
+    public static @Nullable InputHandler getInputHandler(@NotNull Player player) {
+        return USER_CACHE_INPUT_2.get(player);
+    }
+
     public static boolean isEditing(@NotNull Player player) {
         return getEditorInput(player) != null || getEditorHandler(player) != null;
     }
@@ -104,6 +117,18 @@ public class EditorManager extends AbstractManager<NexEngine> implements IListen
         ENGINE.getMessage(EngineLang.EDITOR_TIP_EXIT).send(player);
     }
 
+    public static void startEdit(@NotNull Player player, @NotNull InputHandler handler) {
+        USER_CACHE_INPUT_2.put(player, handler);
+
+        Menu<?> menu = Menu.getMenu(player);
+        if (menu != null) {
+            MenuViewer viewer = menu.getViewer(player);
+            int page = viewer == null ? 1 : viewer.getPage();
+            USER_CACHE_MENU.put(player, Pair.of(menu, page));
+        }
+        ENGINE.getMessage(EngineLang.EDITOR_TIP_EXIT).send(player);
+    }
+
     public static void endEdit(@NotNull Player player) {
         endEdit(player, true);
     }
@@ -115,6 +140,11 @@ public class EditorManager extends AbstractManager<NexEngine> implements IListen
                 entry.getKey().open(player, entry.getValue());
             }
         } else if (USER_CACHE_INPUT.remove(player) != null) {
+            Pair<Menu<?>, Integer> entry = USER_CACHE_MENU.remove(player);
+            if (entry != null) {
+                entry.getFirst().open(player, entry.getSecond());
+            }
+        } else if (USER_CACHE_INPUT_2.remove(player) != null) {
             Pair<Menu<?>, Integer> entry = USER_CACHE_MENU.remove(player);
             if (entry != null) {
                 entry.getFirst().open(player, entry.getSecond());
@@ -211,13 +241,11 @@ public class EditorManager extends AbstractManager<NexEngine> implements IListen
         player.sendMessage(header);
         player.sendMessage(Component.join(JoinConfiguration.newlines(), items));
         player.sendMessage(footer);
-        ENGINE.getMessage(EngineLang.EDITOR_TIP_EXIT).send(player);
     }
 
     @Deprecated
     public static void sendCommandTips(@NotNull Player player) {
-        String text = Colorizer.legacy(
-            """
+        String text = Colorizer.legacy("""
             &7
             &b&lCommand Syntax:
             &2• &a'[CONSOLE] <command>' &2- Execute as Console.
@@ -297,6 +325,25 @@ public class EditorManager extends AbstractManager<NexEngine> implements IListen
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
+    public void onChat3(AsyncPlayerChatEvent event) {
+        Player player = event.getPlayer();
+
+        InputHandler handler = getInputHandler(player);
+        if (handler == null) return;
+
+        event.getRecipients().clear();
+        event.setCancelled(true);
+
+        InputWrapper wrapper = new InputWrapper(event);
+
+        this.plugin.runTask(task -> {
+            if (wrapper.getTextRaw().equalsIgnoreCase(EXIT) || handler.handle(wrapper)) {
+                endEdit(player);
+            }
+        });
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onChatCommand(PlayerCommandPreprocessEvent e) {
         Player player = e.getPlayer();
 
@@ -345,6 +392,34 @@ public class EditorManager extends AbstractManager<NexEngine> implements IListen
 
         this.plugin.getServer().getScheduler().runTask(this.plugin, () -> {
             if (text.equalsIgnoreCase(EXIT) || handler.handle(event)) {
+                endEdit(player);
+            }
+        });
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onChatCommand3(PlayerCommandPreprocessEvent e) {
+        Player player = e.getPlayer();
+
+        InputHandler handler = getInputHandler(player);
+        if (handler == null) return;
+
+        e.setCancelled(true);
+
+        String text = e.getMessage().substring(1);
+        if (text.startsWith(VALUES)) {
+            String[] split = text.split(" ");
+            int page = split.length >= 2 ? StringUtil.getInteger(split[1], 0) : 0;
+            boolean auto = split.length >= 3 && Boolean.parseBoolean(split[2]);
+            displayValues(player, auto, page);
+            return;
+        }
+
+        AsyncPlayerChatEvent event = new AsyncPlayerChatEvent(true, player, text, new HashSet<>());
+        InputWrapper wrapper = new InputWrapper(event);
+
+        this.plugin.runTask(task -> {
+            if (wrapper.getTextRaw().equalsIgnoreCase(EXIT) || handler.handle(wrapper)) {
                 endEdit(player);
             }
         });

@@ -12,17 +12,14 @@ import java.util.stream.Collectors;
  * A util class to handle the legacy color stuff.
  */
 public class Colorizer {
-
     public static final char AMPERSAND_CHAR = LegacyComponentSerializer.AMPERSAND_CHAR;
 
-    @NotNull
-    public static List<String> apply(@NotNull List<String> list) {
+    public static @NotNull List<String> apply(@NotNull List<String> list) {
         list.replaceAll(Colorizer::legacy);
         return list;
     }
 
-    @NotNull
-    public static Set<String> apply(@NotNull Set<String> set) {
+    public static @NotNull Set<String> apply(@NotNull Set<String> set) {
         return set.stream().map(Colorizer::legacy).collect(Collectors.toSet());
     }
 
@@ -40,8 +37,7 @@ public class Colorizer {
      *
      * @return a legacy text where its color codes are in <b>section</b> {@code §} format
      */
-    @NotNull
-    public static String legacy(@NotNull String str) {
+    public static @NotNull String legacy(@NotNull String str) {
         return LegacyComponentSerializer.legacySection().serialize(LegacyComponentSerializer.legacy(AMPERSAND_CHAR).deserialize(str));
     }
 
@@ -50,14 +46,11 @@ public class Colorizer {
      * <p>
      * It's basically a reverse of {@link #legacy(String)}.
      */
-    @NotNull
-    public static String plain(@NotNull String str) {
+    public static @NotNull String plain(@NotNull String str) {
         return LegacyComponentSerializer.legacyAmpersand().serialize(LegacyComponentSerializer.legacySection().deserialize(str));
     }
 
-    @NotNull
-    public static String strip(@NotNull String str) {
+    public static @NotNull String strip(@NotNull String str) {
         return ChatColor.stripColor(str);
     }
-
 }

@@ -3,10 +3,12 @@ package su.nexmedia.engine.api.data.sql.executor;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.data.StorageType;
 import su.nexmedia.engine.api.data.connection.AbstractDataConnector;
+import su.nexmedia.engine.api.data.connection.ConnectorSQLite;
 import su.nexmedia.engine.api.data.sql.SQLColumn;
 import su.nexmedia.engine.api.data.sql.SQLExecutor;
 import su.nexmedia.engine.api.data.sql.SQLQueries;
 import su.nexmedia.engine.api.data.sql.SQLValue;
+import su.nexmedia.engine.api.data.sql.column.ColumnType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,9 +81,12 @@ public final class AlterTableExecutor extends SQLExecutor<Void> {
             this.columns.forEach(value -> {
                 if (SQLQueries.hasColumn(connector, this.table, value.getColumn())) return;
 
-                String sql = "ALTER TABLE " + this.table + " ADD "
-                             + value.getColumn().getName() + " " + value.getColumn().formatType(this.storageType)
-                             + " DEFAULT '" + value.getValue() + "'";
+                String sql = "ALTER TABLE " + this.table + " ADD " + value.getColumn().getName() + " " + value.getColumn().formatType(this.storageType);
+
+                if (connector instanceof ConnectorSQLite || value.getColumn().getType() != ColumnType.STRING) {
+                    sql = sql + " DEFAULT '" + value.getValue() + "'";
+                }
+
                 SQLQueries.executeStatement(connector, sql);
             });
         } else if (this.type == Type.RENAME_COLUMN) {

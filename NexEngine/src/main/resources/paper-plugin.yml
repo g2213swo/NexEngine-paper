@@ -1,22 +1,22 @@
 name: NexEngine
 main: su.nexmedia.engine.NexEngine
-loader: su.nexmedia.engine.NexEngineLoader
 version: ${version}
-api-version: 1.19
+api-version: "1.19"
 authors: [ NightExpress, Nailm ]
 description: ${description}
 load-before: [ ]
 load-after: [ ]
 dependencies:
-  - name: MewCore
-    required: true
-    bootstrap: false
-  - name: Vault
-    required: false
-    bootstrap: false
-  - name: Citizens
-    required: false
-    bootstrap: false
-  - name: MythicMobs
-    required: false
-    bootstrap: false
+  server:
+    Vault:
+      load: OMIT
+      required: false
+      join-classpath: true
+    MewCore:
+      load: OMIT
+      required: true
+      join-classpath: true
+    MythicMobs:
+      load: OMIT
+      required: false
+      join-classpath: true

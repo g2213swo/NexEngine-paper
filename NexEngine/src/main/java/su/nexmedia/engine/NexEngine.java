@@ -9,7 +9,10 @@ import su.nexmedia.engine.editor.EditorManager;
 import su.nexmedia.engine.hooks.Hooks;
 import su.nexmedia.engine.hooks.misc.VaultHook;
 import su.nexmedia.engine.lang.EngineLang;
-import su.nexmedia.engine.nms.*;
+import su.nexmedia.engine.nms.NMS;
+import su.nexmedia.engine.nms.V1_18_R2;
+import su.nexmedia.engine.nms.V1_19_R3;
+import su.nexmedia.engine.nms.V1_20_R1;
 import su.nexmedia.engine.utils.CollectionsUtil;
 
 import java.util.HashSet;
@@ -51,6 +54,7 @@ public class NexEngine extends NexPlugin<NexEngine> {
             this.nms = switch (Version.CURRENT) {
                 case V1_18_R2 -> new V1_18_R2();
                 case V1_19_R3 -> new V1_19_R3();
+                case V1_20_R1 -> new V1_20_R1();
                 default -> throw new IllegalStateException("unsupported NMS version");
             };
             this.info("Loaded NMS version: " + Version.CURRENT.name());
@@ -121,9 +125,7 @@ public class NexEngine extends NexPlugin<NexEngine> {
         return this.childrens;
     }
 
-    @NotNull
-    public NMS getNMS() {
+    public @NotNull NMS getNMS() {
         return nms;
     }
-
 }
