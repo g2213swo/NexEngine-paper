@@ -1,7 +1,5 @@
 package su.nexmedia.engine.api.config;
 
-import cc.mewcraft.mewcore.item.api.PluginItem;
-import cc.mewcraft.mewcore.item.api.PluginItemRegistry;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -476,25 +474,6 @@ public class JYML extends YamlConfiguration {
     public void setItemsEncoded(@NotNull String path, @NotNull List<ItemStack> item) {
         List<String> code = new ArrayList<>(ItemUtil.toBase64(item));
         this.set(path, code);
-    }
-
-    @Nullable
-    public PluginItem<?> getPluginItem(@NotNull String path) {
-        String reference = this.getString(path);
-        return PluginItemRegistry.get().fromReferenceNullable(reference);
-    }
-
-    public void setPluginItem(@NotNull String path, @NotNull ItemStack item) {
-        PluginItem<?> pluginItem = PluginItemRegistry.get().fromItemStackNullable(item);
-        if (pluginItem == null) {
-            NexEngine.get().warn("Failed to write plugin item reference at: " + path);
-            return;
-        }
-        this.set(path, pluginItem.asReference());
-    }
-
-    public void setPluginItem(@NotNull String path, @NotNull PluginItem<?> item) {
-        this.set(path, item.asReference());
     }
 
     @NotNull

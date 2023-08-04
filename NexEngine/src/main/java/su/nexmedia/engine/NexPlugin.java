@@ -30,7 +30,6 @@ import java.util.function.Predicate;
 import java.util.logging.Logger;
 
 public abstract class NexPlugin<P extends NexPlugin<P>> extends JavaPlugin implements ILogger {
-
     public static boolean isPaper = false;
 
     protected ConfigManager<P> configManager;

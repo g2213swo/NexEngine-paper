@@ -1,6 +1,7 @@
 plugins {
-    id("su.nexmedia.project-conventions")
-    alias(libs.plugins.paperweight.userdev)
+    `java-library`
+    `maven-publish`
+    id("io.papermc.paperweight.userdev") version "1.5.5"
 }
 
 dependencies {

@@ -1,15 +1,22 @@
 plugins {
-    id("su.nexmedia.project-conventions")
-    id("cc.mewcraft.publishing-conventions")
-    id("cc.mewcraft.deploy-conventions")
-    id("cc.mewcraft.paper-plugins")
+    `java-library`
+    `maven-publish`
 }
 
 project.ext.set("name", "NexEngine")
+version = "1.0.0-SNAPSHOT"
+group = "su.nexmedia"
+
+repositories {
+    mavenCentral()
+    maven("https://papermc.io/repo/repository/maven-public/")
+    maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
+    maven("https://jitpack.io/")
+}
 
 dependencies {
     // server api
-    compileOnly(libs.server.paper)
+    compileOnly("io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
 
     // the "api" module
     // make it a separate module to avoid circular dependencies
@@ -18,6 +25,7 @@ dependencies {
     // code that requires 3rd plugin dependencies
     // we put it in a separate module to avoid dependency pollution
     api(project(":NexEngineExt"))
+    implementation(project(":NexEngineExt"))
 
     // nms modules
     api(project(":NMS"))
@@ -29,14 +37,24 @@ dependencies {
     compileOnly("org.xerial", "sqlite-jdbc", "3.42.+")
 }
 
-// TODO remove plugin.yml
-/*bukkit {
-    main = "su.nexmedia.engine.NexEngine"
-    name = "NexEngine"
-    version = "${project.version}"
-    apiVersion = "1.17"
-    authors = listOf("NightExpress")
-    softDepend = listOf("Vault", "Citizens", "MythicMobs")
-    load = STARTUP
-    libraries = listOf("com.zaxxer:HikariCP:5.0.1", "it.unimi.dsi:fastutil:8.5.11")
-}*/
+// publish to local maven repo
+publishing {
+    publications {
+        create<MavenPublication>("NexEngine") {
+            groupId = "su.nexmedia"
+            artifactId = "NexEngine"
+            version = "1.0.0-SNAPSHOT"
+            from(components["java"])
+        }
+
+    }
+}
+
+
+
+
+
+
+
+
+

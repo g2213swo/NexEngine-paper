@@ -1,10 +1,11 @@
 plugins {
-    id("su.nexmedia.project-conventions")
-    alias(libs.plugins.paperweight.userdev)
+    `java-library`
+    `maven-publish`
+    id("io.papermc.paperweight.userdev") version "1.5.5"
 }
 
 dependencies {
-    compileOnly(project(":NMS"))
+    compileOnly (project(":NMS"))
     paperweight.paperDevBundle("1.20.1-R0.1-SNAPSHOT")
 }
 
@@ -13,3 +14,4 @@ tasks {
         dependsOn(reobfJar)
     }
 }
+
